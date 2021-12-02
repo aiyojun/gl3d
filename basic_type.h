@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <glm/glm.hpp>
@@ -11,19 +12,33 @@ struct Vertex {
     glm::vec2 texCoords;
     glm::vec3 tangent;
     glm::vec3 bitangent;
-};
-
-struct Material {
-    glm::vec3 Ka;
-    glm::vec3 Kd;
-    glm::vec3 Ks;
+    typedef glm::vec3 v3;
+    Vertex():
+    position(v3(0.0f)), normal(v3(0.0f)), texCoords(v3(0.0f)),
+    tangent(v3(0.0f)), bitangent(v3(0.0f)) {}
+    Vertex(v3 p, v3 n, v3 tc, v3 t, v3 bt)
+    : position(p), normal(n), texCoords(tc), tangent(t), bitangent(bt) {}
 };
 
 struct Texture {
     unsigned int id;
     std::string name;
     std::string path;
+    Texture()
+    : id(0) {}
+    Texture(unsigned int id, std::string name, std::string path)
+    : id(id), name(std::move(name)), path(std::move(path)) {}
 };
+
+struct Material {
+    glm::vec3 Ka;
+    glm::vec3 Kd;
+    glm::vec3 Ks;
+    Texture Td;
+    Texture Ts;
+    float shininess;
+};
+
 
 struct Mesh {
     std::vector<Vertex> vertices;

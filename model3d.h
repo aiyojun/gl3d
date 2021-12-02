@@ -168,6 +168,8 @@ private:
         material->Get(AI_MATKEY_COLOR_DIFFUSE, color);
         material1.Kd = glm::vec3(color.r, color.g, color.b);
         material->Get(AI_MATKEY_COLOR_SPECULAR, color);
+        material->Get(AI_MATKEY_COLOR_SPECULAR, color);
+        material->Get(AI_MATKEY_SHININESS, material1.shininess);
         material1.Ks = glm::vec3(color.r, color.g, color.b);
 
         std::vector<Texture> textures0;
