@@ -34,9 +34,11 @@ struct Material {
     glm::vec3 Ka;
     glm::vec3 Kd;
     glm::vec3 Ks;
+    Texture Ta;
     Texture Td;
     Texture Ts;
     float shininess;
+    Material(): Ka(), Kd(), Ks(), Ta(), Td(), Ts(), shininess(0) {}
 };
 
 
@@ -45,6 +47,10 @@ struct Mesh {
     std::vector<unsigned int> indices;
     std::vector<Texture> textures;
     Material material;
+    Mesh(std::vector<Vertex> v, std::vector<unsigned int> i)
+    : vertices(std::move(v)), indices(std::move(i)) {}
+    Mesh(std::vector<Vertex> v, std::vector<unsigned int> i, Material m)
+    : vertices(std::move(v)), indices(std::move(i)), material(std::move(m)) {}
     Mesh(const std::vector<Vertex>& v, const std::vector<unsigned int>& i, const std::vector<Texture>& t, const Material& m)
     {vertices = v; indices = i; textures = t; material = m;}
 };

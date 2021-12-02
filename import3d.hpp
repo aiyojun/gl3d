@@ -17,11 +17,13 @@
 class three3d_t {
 public:
 
+private:
+    bool decompose_material = true;
 };
 
 #ifdef IMPORT3D_IMPL
 typedef unsigned int indice_t;
-static void decompose_mesh(
+Mesh decompose_mesh(
     const aiScene* scene,
     const aiMesh* mesh)
 {
@@ -41,24 +43,39 @@ static void decompose_mesh(
         for (unsigned int j = 0; j < face.mNumIndices; j++)
             tmp_i.emplace_back(face.mIndices[j]);
     }
-//    aiMaterial* material_ai = scene->mMaterials[mesh->mMaterialIndex];
-//    Material material; aiColor3D color;
-//    material_ai->Get(AI_MATKEY_COLOR_AMBIENT, color);
-//    material.Ka = glm::vec3(color.r, color.g, color.b);
-//    material_ai->Get(AI_MATKEY_COLOR_DIFFUSE, color);
-//    material.Kd = glm::vec3(color.r, color.g, color.b);
-//    material_ai->Get(AI_MATKEY_COLOR_SPECULAR, color);
-//    material.Ks = glm::vec3(color.r, color.g, color.b);
-//    material_ai->Get(AI_MATKEY_COLOR_SPECULAR, material.shininess);
-
+    aiMaterial* material_ai = scene->mMaterials[mesh->mMaterialIndex];
+    Material tmp_m; aiColor3D color;
+    material_ai->Get(AI_MATKEY_COLOR_AMBIENT, color);
+    tmp_m.Ka = glm::vec3(color.r, color.g, color.b);
+    material_ai->Get(AI_MATKEY_COLOR_DIFFUSE, color);
+    tmp_m.Kd = glm::vec3(color.r, color.g, color.b);
+    material_ai->Get(AI_MATKEY_COLOR_SPECULAR, color);
+    tmp_m.Ks = glm::vec3(color.r, color.g, color.b);
+    material_ai->Get(AI_MATKEY_COLOR_SPECULAR, tmp_m.shininess);
+    if (material_ai->GetTextureCount(aiTextureType_DIFFUSE)) {
+        aiString tex_p;
+        material_ai->GetTexture(aiTextureType_DIFFUSE, 0, &tex_p);
+        tmp_m.Td.path = std::string(tex_p.C_Str()));
+    }
+    if (material_ai->GetTextureCount(aiTextureType_SPECULAR)) {
+        aiString tex_p;
+        material_ai->GetTexture(aiTextureType_SPECULAR, 0, &tex_p);
+        tmp_m.Ts.path = std::string(tex_p.C_Str()));
+    }
+    if (material_ai->GetTextureCount(aiTextureType_AMBIENT)) {
+        aiString tex_p;
+        material_ai->GetTexture(aiTextureType_AMBIENT, 0, &tex_p);
+        tmp_m.Ta.path = std::string(tex_p.C_Str()));
+    }
+    return Mesh(tmp_v, tmp_i, tmp_m);
 }
-static void iterate_mesh(
+void iterate_mesh(
     const aiScene* scene,
-    const aiNode* node, int depth)
+    const aiNode* node, std::vector<Mesh>& meshes, int depth)
 {
     for (unsigned int i = 0; i < node->mNumMeshes; i++)
-        decompose_mesh(scene, scene->mMeshes[node->mMeshes[i]]);
+        meshes.emplace_back(decompose_mesh(scene, scene->mMeshes[node->mMeshes[i]]));
     for (unsigned int i = 0; i < node->mNumChildren; i++)
-        iterate_mesh(scene, node->mChildren[i], depth + 1);
+        iterate_mesh(scene, node->mChildren[i], meshes, depth + 1);
 }
 #endif
