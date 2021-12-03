@@ -84,3 +84,13 @@ moDemo/Makefile
 moDemo/glDemo
 
 moDemo/moDemo
+
+imDemo/CMakeFiles/
+
+imDemo/cmake_install.cmake
+
+imDemo/CMakeCache.txt
+
+imDemo/imDemo
+
+imDemo/Makefile
