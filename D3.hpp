@@ -204,8 +204,6 @@ void three3d_t::render()
     for (int i = 0; i < meshes.size(); i++) {
         if (decompose_material) {
             int j = 0;
-            /* Here, watch out use-shader position! It must before shader.set(...). */
-            glUseProgram(j > 0 && shader_ids.size() > 1 ? shader_ids[1] : shader_ids[0]);
             Material& material = meshes[i].material;
             if (!material.Ta.path.empty() && material.Ta.id) {
                 glActiveTexture(GL_TEXTURE0 + j);
@@ -222,6 +220,8 @@ void three3d_t::render()
                 glBindTexture(GL_TEXTURE_2D, material.Ts.id);
                 j++;
             }
+            /* Here, watch out use-shader position! It must before shader.set(...). */
+            glUseProgram(j > 0 && shader_ids.size() > 1 ? shader_ids[1] : shader_ids[0]);
         } else {
             glUseProgram(shader_ids[0]);
         }

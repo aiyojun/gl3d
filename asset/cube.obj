@@ -1,6 +1,6 @@
 # Blender v2.83.5 OBJ File: ''
 # www.blender.org
-mtllib ./cube.mtl
+mtllib /opt/jpro/tmp/gl3d/asset/cube.mtl
 o cube.obj
 v 0 0 0
 v 1 0 0
@@ -32,9 +32,9 @@ f 4/1/2 1/2/2 3/4/2
 f 4/1/2 3/4/2 7/3/2
 f 6/1/5 4/2/5 7/4/5
 f 6/1/5 7/4/5 8/3/5
-usemtl polar_white
-s off
 f 3/1/3 5/2/3 8/4/3
 f 3/1/3 8/4/3 7/3/3
+usemtl polar_white
+s off
 f 4/1/4 6/2/4 2/4/4
 f 4/1/4 2/4/4 1/3/4

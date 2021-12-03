@@ -7,4 +7,4 @@ Ns 2
 newmtl wall
 Ka 0 0 0
 Ns 2
-map_Kd ./wall.jpg
+map_Kd /opt/jpro/tmp/gl3d/asset/wall.jpg
