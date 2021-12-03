@@ -15,15 +15,20 @@
 
 #include <glm/glm.hpp>
 
+#include <GL/glew.h>
+
 typedef unsigned int index_t;
 
 class three3d_t {
 public:
     std::vector<Mesh> meshes;
     std::vector<std::tuple<index_t, index_t, index_t>> ids;
+    std::vector<unsigned int> shader_ids;
+    void set_shader(unsigned int shader);
+    void set_shader(unsigned int shader0, unsigned int shader1);
     void load3d(const char* path, bool mat = true);
-    void prepare(unsigned int shader_id);
-    void render(unsigned int shader_id);
+    void prepare();
+    void render();
 private:
     bool decompose_material;
 };
@@ -34,21 +39,29 @@ Mesh decompose_mesh(
     const aiScene* scene,
     const aiMesh* mesh, bool decompose_material = true)
 {
+    std::cout << "-- decompose_mesh" << std::endl;
     std::vector<Vertex> tmp_v;
     std::vector<index_t> tmp_i;
     for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
         Vertex vertex;
         vertex.position  = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
         vertex.normal    = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
-        vertex.texCoords = mesh->mTextureCoords[0] ? glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y) : glm::vec2(-1.0f);
-        vertex.tangent   = glm::vec3(mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z);
-        vertex.bitangent = glm::vec3(mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z);
+        vertex.texCoords = mesh->mTextureCoords[0] ? glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y) : glm::vec2(0.0f);
+//        vertex.tangent   = glm::vec3(mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z);
+//        vertex.bitangent = glm::vec3(mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z);
         tmp_v.emplace_back(vertex);
+//        std::cout << "-- vertex : " << mesh->mVertices[i].x << ", " << mesh->mVertices[i].y << ", " << mesh->mVertices[i].z <<
+//        "; normal : " << mesh->mNormals[i].x << ", " << mesh->mNormals[i].y << ", " << mesh->mNormals[i].z <<
+//        "; tex : " << vertex.texCoords.x << ", " << vertex.texCoords.y
+//        << std::endl;
     }
+    std::cout << "-- face : " << mesh->mNumFaces << std::endl;
     for (unsigned int i = 0; i < mesh->mNumFaces; i++) {
         const aiFace face = mesh->mFaces[i];
-        for (unsigned int j = 0; j < face.mNumIndices; j++)
+        for (unsigned int j = 0; j < face.mNumIndices; j++) {
             tmp_i.emplace_back(face.mIndices[j]);
+//            std::cout << face.mIndices[j] << std::endl;
+        }
     }
     if (!decompose_material)
         return {tmp_v, tmp_i};
@@ -112,6 +125,11 @@ unsigned int loadTexture(const std::string& path) {
     return r;
 }
 
+void three3d_t::set_shader(unsigned int shader)
+{shader_ids.clear();shader_ids.emplace_back(shader);}
+void three3d_t::set_shader(unsigned int shader0, unsigned int shader1)
+{shader_ids.clear();shader_ids.emplace_back(shader0);shader_ids.emplace_back(shader1);}
+
 void three3d_t::load3d(const char *path, bool mat)
 {
     decompose_material = mat;
@@ -126,7 +144,7 @@ void three3d_t::load3d(const char *path, bool mat)
     iterate_mesh(scene, scene->mRootNode, meshes, decompose_material, 0);
 }
 
-void three3d_t::prepare(unsigned int shader_id)
+void three3d_t::prepare()
 {
     for (int i = 0; i < meshes.size(); i++) {
         index_t vao, vbo, ebo;
@@ -142,44 +160,55 @@ void three3d_t::prepare(unsigned int shader_id)
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, meshes[i].indices.size() * sizeof(unsigned int), &(meshes[i].indices[0]), GL_STATIC_DRAW);
 
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) offsetof(Vertex, position));
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*) 0);
         glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) offsetof(Vertex, normal));
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*) (3 * sizeof(float)));
         glEnableVertexAttribArray(2);
-        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) offsetof(Vertex, texCoords));
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*) (6 * sizeof(float)));
 
         glBindVertexArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
         ids.emplace_back(std::tuple<index_t, index_t, index_t>(vao, vbo, ebo));
-        if (!decompose_material) return;
+        if (!decompose_material) continue;
 
+        int j = 0;
         if (!meshes[i].material.Ta.path.empty()) {
             meshes[i].material.Ta.id = loadTexture(meshes[i].material.Ta.path);
             if (meshes[i].material.Ta.id != 0) {
-                glUniform1i(glGetUniformLocation(shader_id, "material.ambient"), 0);
+                glUseProgram(shader_ids[1]);
+                glUniform1i(glGetUniformLocation(shader_ids[1], "material.ambient"), j++);
             }
         }
         if (!meshes[i].material.Td.path.empty()) {
             meshes[i].material.Td.id = loadTexture(meshes[i].material.Td.path);
             if (meshes[i].material.Td.id != 0) {
-                glUniform1i(glGetUniformLocation(shader_id, "material.diffuse"), 0);
+                glUseProgram(shader_ids[1]);
+                glUniform1i(glGetUniformLocation(shader_ids[1], "material.diffuse"), j++);
             }
         }
         if (!meshes[i].material.Ts.path.empty()) {
             meshes[i].material.Ts.id = loadTexture(meshes[i].material.Ts.path);
             if (meshes[i].material.Ts.id != 0) {
-                glUniform1i(glGetUniformLocation(shader_id, "material.specular"), 0);
+                glUseProgram(shader_ids[1]);
+                glUniform1i(glGetUniformLocation(shader_ids[1], "material.specular"), j++);
             }
         }
     }
+//    for (int i = 0; i < meshes.size(); i++) {
+//        std::cout << "mesh " << i << std::endl;
+//        for (int j = 0; j < meshes[i].indices.size(); j++) {
+//            std::cout << meshes[i].indices[j] << std::endl;
+//        }
+//    }
 }
 
-void three3d_t::render(unsigned int /*shader_id*/)
+void three3d_t::render()
 {
     for (int i = 0; i < meshes.size(); i++) {
         if (decompose_material) {
+            std::cout << "-- rendering material" << std::endl;
             int j = 0;
             Material& material = meshes[i].material;
             if (!material.Ta.path.empty() && material.Ta.id) {
@@ -197,11 +226,16 @@ void three3d_t::render(unsigned int /*shader_id*/)
                 glBindTexture(GL_TEXTURE_2D, material.Ts.id);
                 j++;
             }
+            glUseProgram(j > 0 && shader_ids.size() > 1 ? shader_ids[1] : shader_ids[0]);
+        } else {
+            std::cout << "-- rendering color " << shader_ids[0] << std::endl;
+            glUseProgram(shader_ids[0]);
         }
+//        std::cout << "-- bind vao: " << std::get<0>(ids[i]) << std::endl;
+        std::cout << "-- bind vao: " << std::get<0>(ids[i]) << std::endl;
         glBindVertexArray(std::get<0>(ids[i]));
         glDrawElements(GL_TRIANGLES, meshes[i].indices.size(), GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
-        if (decompose_material) glActiveTexture(GL_TEXTURE0);
     }
 }
 #endif

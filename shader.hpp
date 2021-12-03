@@ -38,6 +38,7 @@ static std::string read_file(const char *path)
         fp.close();
         r = pipeline.str();
     } catch (std::ifstream::failure &) {
+        std::cout << std::string("Read [") + path + "] failed!\n";
         throw std::string("Read [") + path + "] failed!";
     }
     return std::move(r);

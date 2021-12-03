@@ -72,3 +72,13 @@ glDemo/test_circle.cpp
 cmake-build-debug/
 
 .idea/
+
+moDemo/CMakeFiles/
+
+moDemo/cmake_install.cmake
+
+moDemo/CMakeCache.txt
+
+moDemo/Makefile
+
+moDemo/glDemo

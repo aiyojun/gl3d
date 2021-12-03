@@ -14,6 +14,8 @@
 
 #include "basic_type.h"
 #include "shader.h"
+//#define IMPORT3D_IMPL
+//#include "import3d.hpp"
 
 class j_model3d {
 public:
