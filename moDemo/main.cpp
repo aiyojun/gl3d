@@ -4,24 +4,21 @@
 #include <GL/glut.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#define SHADER_IMPL
+#define ALL_IMPL
 #include "../shader.hpp"
-#define IMPORT3D_IMPL
-#include "../import3d.hpp"
+#include "../D3.hpp"
 
-shader_t shader0;
-shader_t shader1;
+shader_t shader0, shader1;
 
 three3d_t three3D;
 
 void init() {
-    shader0.init("./color_v.glsl", "./color_f.glsl");
-    shader1.init("./v.shader", "./f.shader");
+    shader0.init("../shader/color_v.glsl", "../shader/color_f.glsl");
+    shader1.init("../shader/v.shader", "../shader/f.shader");
     three3D.set_shader(shader0.ID, shader1.ID);
-    three3D.load3d("./cube.obj", true);
-//    three3D.load3d("/opt/lea/learn-gl/uploads_files_2787791_Mercedes+Benz+GLS+580.obj", false);
+    three3D.load3d("../asset/cube.obj", true);
+//    three3D.load3d("../asset/uploads_files_2787791_Mercedes+Benz+GLS+580.obj", false);
     three3D.prepare();
-    std::cout << "---1" << std::endl;
 
 //    shader0.use();
 //    shader0.setFloat("material.shininess", 2.0f);
@@ -45,7 +42,6 @@ void display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
-    std::cout << "---2" << std::endl;
 
     glm::vec3 viewPos = glm::vec3(-2.0f, 2.0f, -2.0f);
     glm::mat4 transform = glm::mat4(1.0f);
@@ -65,7 +61,6 @@ void display() {
     shader1.setVec3("viewPos", viewPos);
 
     three3D.render();
-    std::cout << "---3" << std::endl;
 
     glutSwapBuffers();
 }

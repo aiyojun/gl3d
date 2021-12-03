@@ -25,8 +25,7 @@ else()
 endif()
 
 set(SOURCE_FILES
-  gmain.cpp
-  shader.cpp
+  main.cpp
   ${IMGUI_ROOT}/imgui.cpp
   ${IMGUI_ROOT}/imgui_demo.cpp
   ${IMGUI_ROOT}/imgui_draw.cpp
@@ -36,7 +35,7 @@ set(SOURCE_FILES
   ${IMGUI_ROOT}/backends/imgui_impl_opengl2.cpp)
 
 include_directories(${SYSTEM_INCLUDE} ${EXTRA_INCLUDE})
-add_executable(${PROJECT_NAME} ${SOURCE_FILES})
+add_executable(${PROJECT_NAME} WIN32 ${SOURCE_FILES})
 
 if(UNIX)
   target_link_libraries(${PROJECT_NAME} stdc++ assimp GL GLU glut GLEW)

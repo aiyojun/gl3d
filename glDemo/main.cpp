@@ -1,5 +1,5 @@
-#include <iostream>
 #include <string>
+#include <iostream>
 #include <GL/glew.h>
 #include <GL/glut.h>
 #include <glm/glm.hpp>
@@ -125,7 +125,7 @@ void init() {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-    loadTexture("./wall.jpg");
+    loadTexture("../asset/wall.jpg");
 
     shader.use();
 
@@ -178,7 +178,7 @@ int main(int argc, char** argv) {
     glutCreateWindow("OpenGL Demo");
     glewInit();
 
-    shader.init("./v.shader", "./f.shader");
+    shader.init("../shader/v.shader", "../shader/f.shader");
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
 
