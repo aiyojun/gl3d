@@ -15,6 +15,7 @@ The short-term targets:
 - Light line rendering
 - Particle effect
 - Post-production
+- Build scene
 
 ## Custom C/C++ interface
 
@@ -22,6 +23,7 @@ The short-term targets:
 | ---- | ---- |
 | shader.hpp | GLSL compilation |
 | D3.hpp | 3D Model importing via assimp |
+| smartfs.hpp | Simplify file searching |
 | sbt_image.h | load images, refer from LearnOpenGL |
 
 ## Use cases
@@ -32,4 +34,5 @@ Summary of several small demos:
 | ---- | ---- |
 | glDemo | simple demo for using vao, vbo, ebo, texture, glsl, etc. |
 | moDemo | simple demo for using assimp to import 3D model via a hand-writing obj file. |
-| imDemo | simple model control, interactive-form |
+| imDemo | simple model control, interactive-form. |
+| skyDemo | simple model for creating cube texture, sky box, etc. |
