@@ -8,18 +8,19 @@
 #include <imgui_impl_glut.h>
 #include <imgui_impl_opengl2.h>
 #define ALL_IMPL
+#include "../smartfs.hpp"
 #include "../shader.hpp"
 #include "../D3.hpp"
 #include "../coords.hpp"
+#define STB_IMAGE_IMPLEMENTATION
+#include "../stb_image.h"
 
 float width_w = 960.0f, height_w = 480.0f;
 
-shader_t shader0, shader1, shader3, shader_sky;
+shader_t shader0, shader1, shader3;
 
 coords_t  coords;
-three3d_t three3D, sky_box;
-
-unsigned int sky_tex = 0;
+three3d_t three3D;
 
 glm::vec3 viewPos;
 glm::vec3 viewDir;
@@ -27,57 +28,15 @@ glm::mat4 transform;
 glm::mat4 view;
 glm::mat4 projection;
 
-glm::mat4 transform_sky;
-
 Light light;
-
-unsigned int create_sky(const char* prefix) // prefix = F:/gl3d-main/asset/default_sky_box_
-{
-    unsigned int tex;
-    glGenTextures(1, &tex);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, tex);
-
-    unsigned char *side_d, *sky_d, *ground_d;
-    int width, height, depth;
-    side_d   = stbi_load((std::string(prefix) + "side.jpg"  ).c_str(), &width, &height, &depth, 0);
-    sky_d    = stbi_load((std::string(prefix) + "sky.jpg"   ).c_str(), &width, &height, &depth, 0);
-    ground_d = stbi_load((std::string(prefix) + "ground.jpg").c_str(), &width, &height, &depth, 0);
-    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 
-    0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, side_d);
-    glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 
-    0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, side_d);
-    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 
-    0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, side_d);
-    glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 
-    0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, side_d);
-    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 
-    0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, sky_d);
-    glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 
-    0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, ground_d);
-
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
-    stbi_image_free((void *) side_d);
-    stbi_image_free((void *) sky_d);
-    stbi_image_free((void *) ground_d);
-
-    return tex;
-}
 
 void init() {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
-    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
-    // Setup Dear ImGui style
-    ImGui::StyleColorsDark();
+    ImGuiIO& io = ImGui::GetIO();
+//    ImGui::StyleColorsDark();
     // ImGui::StyleColorsLight();
-    // ImGui::StyleColorsClassic();
-    // Setup Platform/Renderer backends
+     ImGui::StyleColorsClassic();
     ImGui_ImplGLUT_Init();
     ImGui_ImplGLUT_InstallFuncs();
     ImGui_ImplOpenGL2_Init();
@@ -93,29 +52,20 @@ void init() {
     view = glm::lookAt(viewPos, viewDir, glm::vec3(0.0f, 1.0f, 0.0f));
     projection = glm::perspective(glm::radians(60.0f), width_w / height_w, 0.1f, 100.0f);
 
-    shader0.init("../../shader/color_v.glsl", "../../shader/color_f.glsl");
-    shader1.init("../../shader/v.shader", "../../shader/f.shader");
-    shader3.init("../../shader/coords_v.glsl", "../../shader/coords_f.glsl");
-    shader_sky.init("../../shader/sky_box_v.glsl", "../../shader/sky_box_f.glsl");
+    shader0.init(
+            smartfs::subdir_find("../..", "color_v.glsl").c_str(),
+            smartfs::subdir_find("../..", "color_f.glsl",true).c_str());
+    shader1.init(
+            smartfs::subdir_find("../..", "v.shader",true).c_str(),
+            smartfs::subdir_find("../..", "f.shader",true).c_str());
+    shader3.init(
+            smartfs::subdir_find("../..", "coords_v.glsl",true).c_str(),
+            smartfs::subdir_find("../..", "coords_f.glsl",true).c_str());
     coords.init();
     three3D.set_shader(shader0.ID, shader1.ID);
-    three3D.load3d("../../asset/cube.obj", true);
+    three3D.load3d(smartfs::subdir_find("../..", "cube.obj",true).c_str(), true);
 //    three3D.load3d("../asset/uploads_files_2787791_Mercedes+Benz+GLS+580.obj", false);
     three3D.prepare();
-
-    sky_box.set_shader(shader_sky.ID);
-    sky_box.no_fragment_variable = true;
-    sky_box.attribute_n = 1;
-    sky_box.attributes_m = {3};
-    sky_box.set_not_normal();
-    sky_box.load3d("../../asset/cube.obj", false);
-    sky_box.prepare();
-    sky_tex = create_sky("../../asset/default_sky_box_");
-    std::cout << "-- create sky box texture id : " << sky_tex << std::endl;
-    shader_sky.use();
-    shader_sky.setInt("skybox", 0);
-    // glUniform1i(glGetUniformLocation(shader_sky.ID, "skybox"), 0);
-
     // shader0.use();
     // shader1.use();
 
@@ -139,12 +89,6 @@ void display() {
 	height_w = (float) glutGet(GLUT_WINDOW_HEIGHT);
 	glViewport(0, 0, (int) width_w, (int) height_w);
     projection = glm::perspective(glm::radians(60.0f), width_w / height_w, 0.1f, 100.0f);
-
-    transform_sky = glm::translate(transform_sky, glm::vec3(-0.5f, -0.5f, -0.5f));
-    // transform_sky = glm::scale(transform_sky, glm::vec3(10.f, 10.f, 10.f));
-    // transform_sky = glm::translate(transform_sky, viewPos);
-
-
 
     shader0.use();
     shader0.setMat4("transform", transform);
@@ -177,21 +121,6 @@ void display() {
     shader1.setVec3("light.specular"     , light.specular);
 
     //three3D.render();
-
-    // sky box transform
-    // glDepthMask(GL_FALSE);
-    glDepthFunc(GL_LEQUAL);
-    shader_sky.use();
-    // shader_sky.setMat4("view", glm::mat4(glm::mat3(view)));
-    shader_sky.setMat4("transform", transform_sky);
-    shader_sky.setMat4("projection", projection);
-    shader_sky.setMat4("view", view);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, sky_tex);
-    sky_box.render();
-    glDepthFunc(GL_LESS);
-    // glDepthMask(GL_TRUE);
-
     glUseProgram(0);
     ImGui_ImplOpenGL2_NewFrame();
     ImGui_ImplGLUT_NewFrame();

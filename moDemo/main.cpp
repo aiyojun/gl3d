@@ -7,19 +7,23 @@
 #define ALL_IMPL
 #include "../shader.hpp"
 #include "../D3.hpp"
+#include "../smartfs.hpp"
+#define STB_IMAGE_IMPLEMENTATION
+#include "../stb_image.h"
 
 shader_t shader0, shader1;
 
 three3d_t three3D;
 
 void init() {
-    shader0.init("../shader/color_v.glsl", "../shader/color_f.glsl");
-    shader1.init("../shader/v.shader", "../shader/f.shader");
+    shader0.init(smartfs::subdir_find("../..", "color_v.glsl").c_str(),
+                 smartfs::subdir_find("../..", "color_f.glsl",true).c_str());
+    shader1.init(smartfs::subdir_find("../..", "v.shader",true).c_str(),
+                 smartfs::subdir_find("../..", "f.shader",true).c_str());
     three3D.set_shader(shader0.ID, shader1.ID);
-    three3D.load3d("../asset/cube.obj", true);
+    three3D.load3d(smartfs::subdir_find("../..", "cube.obj",true).c_str(), true);
 //    three3D.load3d("../asset/uploads_files_2787791_Mercedes+Benz+GLS+580.obj", false);
     three3D.prepare();
-
 //    shader0.use();
 //    shader0.setFloat("material.shininess", 2.0f);
 //    shader0.setVec3("light.direction", glm::vec3(-1.0f, -1.0f, -1.0f));

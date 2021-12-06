@@ -4,6 +4,10 @@ Useful OpenGL code fragments! For fast building of OpenGL program.
 
 ## Description
 
+Support win32, linux. Use cmake to complete compilation.
+
+Watch out copy .dll in win32 environment.
+
 The short-term targets:
 
 - Research OpenGL API

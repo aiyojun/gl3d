@@ -16,12 +16,16 @@ public:
     // Methods have side effect & relative platform
     static bool file_exist(const std::string& path);
     static void list_dir(std::vector<std::string>& ls, const std::string& path, LIST_TYPE ls_type = LIST_TYPE::ALL);
-    static std::string subdir_find(const std::string& dir, const std::string& filename);
+    static std::string subdir_find(const std::string& dir, const std::string& filename, bool use_cache = false);
+private:
+    static std::vector<std::string> finding_cache;
 };
 
 #if defined(ALL_IMPL)
 
 #include <exception>
+
+std::vector<std::string> smartfs::finding_cache;
 
 std::string smartfs::vector_join(const std::string& demi, const std::vector<std::string>& v)
 {
@@ -60,12 +64,14 @@ std::vector<std::string> smartfs::path_split(const std::string& path)
     return std::move(r);
 }
 
-std::string smartfs::subdir_find(const std::string& dir, const std::string& filename)
+std::string smartfs::subdir_find(const std::string& dir, const std::string& filename, bool use_cache)
 {
     if (filename.find('/') != std::string::npos) return "";
-    std::vector<std::string> ls;
-    list_dir(ls, dir, LIST_TYPE::RECURSE);
-    for (const auto& file_path : ls) {
+    if (!use_cache) {
+        finding_cache.clear();
+        list_dir(finding_cache, dir, LIST_TYPE::RECURSE);
+    }
+    for (const auto& file_path : finding_cache) {
         std::string::size_type last_index = file_path.find_last_of('/');
         std::string name;
         if (last_index == std::string::npos) name = file_path;

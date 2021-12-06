@@ -4,8 +4,9 @@
 #include <GL/glut.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#define SHADER_IMPL
+#define ALL_IMPL
 #include "../shader.hpp"
+#include "../smartfs.hpp"
 #define STB_IMAGE_IMPLEMENTATION
 #include "../stb_image.h"
 
@@ -125,7 +126,7 @@ void init() {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-    loadTexture("../asset/wall.jpg");
+    loadTexture(smartfs::subdir_find("../..", "wall.jpg"));
 
     shader.use();
 
