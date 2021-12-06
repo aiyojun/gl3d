@@ -38,5 +38,12 @@ Summary of several small demos:
 | ---- | ---- |
 | glDemo | simple demo for using vao, vbo, ebo, texture, glsl, etc. |
 | moDemo | simple demo for using assimp to import 3D model via a hand-writing obj file. |
-| imDemo | simple model control, interactive-form. |
+| imDemo | simple model control, interactive-form, and draw coordinate. |
 | skyDemo | simple model for creating cube texture, sky box, etc. |
+
+## Build
+
+```
+./build.sh             # compile
+./build/glDemo/glDemo  # run glDemo
+```

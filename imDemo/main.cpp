@@ -35,8 +35,8 @@ void init() {
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
 //    ImGui::StyleColorsDark();
-    // ImGui::StyleColorsLight();
-     ImGui::StyleColorsClassic();
+//    ImGui::StyleColorsLight();
+    ImGui::StyleColorsClassic();
     ImGui_ImplGLUT_Init();
     ImGui_ImplGLUT_InstallFuncs();
     ImGui_ImplOpenGL2_Init();
@@ -52,30 +52,28 @@ void init() {
     view = glm::lookAt(viewPos, viewDir, glm::vec3(0.0f, 1.0f, 0.0f));
     projection = glm::perspective(glm::radians(60.0f), width_w / height_w, 0.1f, 100.0f);
 
+    smartfs::cache(smartfs::prefix(smartfs::runtime_path(), "gl3d"));
     shader0.init(
-            smartfs::subdir_find("../..", "color_v.glsl").c_str(),
-            smartfs::subdir_find("../..", "color_f.glsl",true).c_str());
+            smartfs::find("color_v.glsl").c_str(),
+            smartfs::find("color_f.glsl").c_str());
     shader1.init(
-            smartfs::subdir_find("../..", "v.shader",true).c_str(),
-            smartfs::subdir_find("../..", "f.shader",true).c_str());
+            smartfs::find("v.shader").c_str(),
+            smartfs::find("f.shader").c_str());
     shader3.init(
-            smartfs::subdir_find("../..", "coords_v.glsl",true).c_str(),
-            smartfs::subdir_find("../..", "coords_f.glsl",true).c_str());
+            smartfs::find("coords_v.glsl").c_str(),
+            smartfs::find("coords_f.glsl").c_str());
     coords.init();
     three3D.set_shader(shader0.ID, shader1.ID);
-    three3D.load3d(smartfs::subdir_find("../..", "cube.obj",true).c_str(), true);
+    three3D.load3d(smartfs::find("cube.obj").c_str(), true);
 //    three3D.load3d("../asset/uploads_files_2787791_Mercedes+Benz+GLS+580.obj", false);
     three3D.prepare();
-    // shader0.use();
-    // shader1.use();
-
 }
 
 void reshape(int width, int height) {
 	std::cout << "window height_w : " << height_w << ", width_w : " << width_w << ", heigth : " << height << ", width : " << width << std::endl;
 	width_w = (float)glutGet(GLUT_WINDOW_WIDTH);
 	height_w = (float)glutGet(GLUT_WINDOW_HEIGHT);
-    glViewport(0, 0, width_w, height_w);
+    glViewport(0, 0, (int) width_w, (int) height_w);
 }
 
 void display() {

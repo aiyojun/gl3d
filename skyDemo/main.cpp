@@ -56,18 +56,23 @@ void init() {
     light.diffuse   = glm::vec3(1.f, 1.f, 1.f);
     light.specular  = glm::vec3(1.f, 1.0f, 1.0f);
 
-    shader3.init("../shader/coords_v.glsl", "../shader/coords_f.glsl");
-    shader_sky.init("../shader/sky_box_v.glsl", "../shader/sky_box_f.glsl");
+    smartfs::cache(smartfs::prefix(smartfs::runtime_path(), "gl3d"));
+    shader3.init(
+            smartfs::find("coords_v.glsl").c_str(),
+            smartfs::find("coords_f.glsl").c_str());
+    shader_sky.init(
+            smartfs::find("sky_box_v.glsl").c_str(),
+            smartfs::find("sky_box_f.glsl").c_str());
     coords.init();
-
+    
     skybox_m.prepare();
     std::vector<std::string> skys = {
-        "../asset/default_sky_box_side.jpg", 
-        "../asset/default_sky_box_side.jpg", 
-        "../asset/default_sky_box_sky.jpg", 
-        "../asset/default_sky_box_ground.jpg",
-        "../asset/default_sky_box_side.jpg", 
-        "../asset/default_sky_box_side.jpg"
+        smartfs::find("default_sky_box_side.jpg"),
+        smartfs::find("default_sky_box_side.jpg"),
+        smartfs::find("default_sky_box_sky.jpg"),
+        smartfs::find("default_sky_box_ground.jpg"),
+        smartfs::find("default_sky_box_side.jpg"),
+        smartfs::find("default_sky_box_side.jpg")
     };
     sky_tex = skybox_t::create_sky(skys);
     shader_sky.use();

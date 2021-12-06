@@ -126,7 +126,7 @@ void init() {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-    loadTexture(smartfs::subdir_find("../..", "wall.jpg"));
+    loadTexture(smartfs::find("wall.jpg"));
 
     shader.use();
 
@@ -178,13 +178,11 @@ int main(int argc, char** argv) {
     glutInitWindowPosition(500, 400);
     glutCreateWindow("OpenGL Demo");
     glewInit();
-
-    shader.init("../shader/v.shader", "../shader/f.shader");
+    smartfs::cache(smartfs::prefix(smartfs::runtime_path(), "gl3d"));
+    shader.init(smartfs::find("v.shader").c_str(), smartfs::find("f.shader").c_str());
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
-
     init();
-
     glutMainLoop();
     return 0;
 }

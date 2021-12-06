@@ -13,8 +13,12 @@ public:
     static std::string dirname(const std::string& path);
     static std::string path_join(const std::string& dir, const std::string& s);
     static std::vector<std::string> path_split(const std::string& path);
+    static std::string runtime_path();
     // Methods have side effect & relative platform
     static bool file_exist(const std::string& path);
+    static void cache(const std::string& root);
+    static std::string find(const std::string& file);
+    static std::string prefix(const std::string& , const std::string& node);
     static void list_dir(std::vector<std::string>& ls, const std::string& path, LIST_TYPE ls_type = LIST_TYPE::ALL);
     static std::string subdir_find(const std::string& dir, const std::string& filename, bool use_cache = false);
 private:
@@ -64,6 +68,24 @@ std::vector<std::string> smartfs::path_split(const std::string& path)
     return std::move(r);
 }
 
+void smartfs::cache(const std::string& root)
+{
+    finding_cache.clear();
+    list_dir(finding_cache, root, LIST_TYPE::RECURSE);
+}
+
+std::string smartfs::find(const std::string& filename)
+{
+    for (const auto& file_path : finding_cache) {
+        std::string::size_type last_index = file_path.find_last_of('/');
+        std::string name;
+        if (last_index == std::string::npos) name = file_path;
+        else name = file_path.substr(last_index + 1);
+        if (name == filename) return file_path;
+    }
+    return "";
+}
+
 std::string smartfs::subdir_find(const std::string& dir, const std::string& filename, bool use_cache)
 {
     if (filename.find('/') != std::string::npos) return "";
@@ -86,6 +108,7 @@ std::string smartfs::subdir_find(const std::string& dir, const std::string& file
 #include <fcntl.h>
 #include <dirent.h>
 #include <unistd.h>
+#include <climits>
 #include <sys/stat.h>
 #include <bits/struct_stat.h>
 
@@ -99,6 +122,25 @@ bool smartfs::is_dir(const std::string& path)
 bool smartfs::file_exist(const std::string& path)
 {
     return access(path.c_str(), F_OK) != -1;
+}
+
+std::string smartfs::runtime_path()
+{
+    char buf[512] = {0};
+    if (!getcwd(buf, 512)) return "";
+    return std::move(std::string(buf));
+}
+
+std::string smartfs::prefix(const std::string& file_path, const std::string& node)
+{
+    char buf[512] = {0};
+    if (!realpath(file_path.c_str(), buf)) return "";
+    std::string absolute_path(buf);
+    std::string::size_type index = absolute_path.find_first_of(node);
+    std::string r = index == std::string::npos ? absolute_path.substr(0) : absolute_path.substr(0, index);
+    if (r.length() == file_path.length()) return "";
+    while (r[r.length() - 1] == '/') r = r.substr(0, r.length() - 1);
+    return path_join(r, node);
 }
 
 void smartfs::list_dir(std::vector<std::string>& ls, const std::string& path, LIST_TYPE ls_type)
@@ -141,6 +183,16 @@ bool smartfs::file_exist(const std::string& path)
     return false;
 }
 
+std::string smartfs::runtime_path()
+{
+    return "";
+}
+
+std::string smartfs::prefix(const std::string& file_path, const std::string& node)
+{
+    return "";
+}
+
 void smartfs::list_dir(std::vector<std::string>& ls, const std::string& path, LIST_TYPE ls_type)
 {
     throw std::runtime_error("unimplemented list_dir in win32");
@@ -158,6 +210,16 @@ bool smartfs::file_exist(const std::string& path)
 {
     throw std::runtime_error("unimplemented file_exist in windows");
     return false;
+}
+
+std::string smartfs::runtime_path()
+{
+    return "";
+}
+
+std::string smartfs::prefix(const std::string& file_path, const std::string& node)
+{
+    return "";
 }
 
 void smartfs::list_dir(std::vector<std::string>& ls, const std::string& path, LIST_TYPE ls_type)
