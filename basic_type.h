@@ -69,3 +69,10 @@ public:
     float _far = 100.0f;
     float _degree = 60;
 };
+
+struct Light {
+    glm::vec3 direction;
+    glm::vec3 ambient;
+    glm::vec3 diffuse;
+    glm::vec3 specular;
+};

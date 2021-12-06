@@ -6,6 +6,7 @@
 class shader_t {
 public:
     unsigned int ID;
+    void init(const char *vert);
     void init(const char *vert, const char* frag);
     void use();
     void setInt(const std::string& name, int value);
@@ -41,19 +42,20 @@ static std::string read_file(const char *path)
         r = pipeline.str();
     } catch (std::ifstream::failure &) {
         std::cout << std::string("Read [") + path + "] failed!\n";
-        throw std::string("Read [") + path + "] failed!";
+        exit(1);
+        // throw std::string("Read [") + path + "] failed!";
     }
     return std::move(r);
 }
 
 static unsigned int create_shader(int shader_type, const char* source)
 {
-    unsigned int r = 0;
-    if (!shader_type) {
-        r = glCreateShader(GL_VERTEX_SHADER);
-    } else {
-        r = glCreateShader(GL_FRAGMENT_SHADER);
-    }
+    unsigned int r = glCreateShader(shader_type! ? GL_VERTEX_SHADER : GL_FRAGMENT_SHADER);
+    // if (!shader_type) {
+    //     r = glCreateShader(GL_VERTEX_SHADER);
+    // } else {
+    //     r = glCreateShader(GL_FRAGMENT_SHADER);
+    // }
     glShaderSource(r, 1, &source, nullptr);
     glCompileShader(r);
     int state_code = 0; char err_msg[512];
@@ -83,6 +85,20 @@ static unsigned int create_program(unsigned int shaders[], int n)
     for (int i = 0; i < n; i++)
         glDeleteShader(shaders[i]);
     return r;
+}
+
+void shader_t::init(const char *vert)
+{
+    std::string glsl_v = read_file(vert);
+    std::cout << "****************************************" << std::endl;
+    std::cout << "*********** shader vertex **************" << std::endl;
+    std::cout << "****************************************" << std::endl;
+    std::cout << glsl_v << std::endl;
+    int state_code = 0;
+    char err_msg[512];
+    unsigned int id_v = create_shader(0, glsl_v.c_str());
+    unsigned int shaders[1] = {id_v};
+    ID = create_program(shaders, 1);
 }
 
 void shader_t::init(const char *vert, const char* frag)
