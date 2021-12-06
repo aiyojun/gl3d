@@ -11,6 +11,10 @@
 #include "../shader.hpp"
 #include "../D3.hpp"
 #include "../coords.hpp"
+#include "../skybox.hpp"
+#include "../smartfs.hpp"
+#define STB_IMAGE_IMPLEMENTATION
+#include "../stb_image.h"
 
 #define _PI_ 3.1415926
 
@@ -20,55 +24,10 @@ unsigned int sky_tex = 0;
 shader_t shader3, shader_sky;
 glm::mat4 transform_sky;
 
+skybox_t skybox_m;
+
 coords_t  coords;
 // three3d_t sky_box;
-
-float skyboxVertices[] = {
-    // positions          
-    -1.0f,  1.0f, -1.0f,
-    -1.0f, -1.0f, -1.0f,
-    1.0f, -1.0f, -1.0f,
-    1.0f, -1.0f, -1.0f,
-    1.0f,  1.0f, -1.0f,
-    -1.0f,  1.0f, -1.0f,
-
-    -1.0f, -1.0f,  1.0f,
-    -1.0f, -1.0f, -1.0f,
-    -1.0f,  1.0f, -1.0f,
-    -1.0f,  1.0f, -1.0f,
-    -1.0f,  1.0f,  1.0f,
-    -1.0f, -1.0f,  1.0f,
-
-    1.0f, -1.0f, -1.0f,
-    1.0f, -1.0f,  1.0f,
-    1.0f,  1.0f,  1.0f,
-    1.0f,  1.0f,  1.0f,
-    1.0f,  1.0f, -1.0f,
-    1.0f, -1.0f, -1.0f,
-
-    -1.0f, -1.0f,  1.0f,
-    -1.0f,  1.0f,  1.0f,
-    1.0f,  1.0f,  1.0f,
-    1.0f,  1.0f,  1.0f,
-    1.0f, -1.0f,  1.0f,
-    -1.0f, -1.0f,  1.0f,
-
-    -1.0f,  1.0f, -1.0f,
-    1.0f,  1.0f, -1.0f,
-    1.0f,  1.0f,  1.0f,
-    1.0f,  1.0f,  1.0f,
-    -1.0f,  1.0f,  1.0f,
-    -1.0f,  1.0f, -1.0f,
-
-    -1.0f, -1.0f, -1.0f,
-    -1.0f, -1.0f,  1.0f,
-    1.0f, -1.0f, -1.0f,
-    1.0f, -1.0f, -1.0f,
-    -1.0f, -1.0f,  1.0f,
-    1.0f, -1.0f,  1.0f
-};
-
-unsigned int skyboxVAO = 0, skyboxVBO = 0;
 
 float alpha = 0;
 float offset_x = 0;
@@ -83,62 +42,11 @@ glm::mat4 projection;
 
 Light light;
 
-unsigned int create_sky(const char* prefix) // prefix = F:/gl3d-main/asset/default_sky_box_
-{
-    unsigned int tex;
-    glGenTextures(1, &tex);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, tex);
-
-    unsigned char *right, *left, *top, *bottom, *front, *back;//*side_d, *sky_d, *ground_d, 
-    int width, height, depth;
-    std::string group[] = {
-        "default_sky_box_side.jpg", 
-        "default_sky_box_side.jpg", 
-        "default_sky_box_sky.jpg", 
-        "default_sky_box_ground.jpg",
-        "default_sky_box_side.jpg", 
-        "default_sky_box_side.jpg"
-        };
-    right    = stbi_load((std::string(prefix) + group[0]).c_str(), &width, &height, &depth, 0);
-    left     = stbi_load((std::string(prefix) + group[1]).c_str(), &width, &height, &depth, 0);
-    top      = stbi_load((std::string(prefix) + group[2]).c_str(), &width, &height, &depth, 0);
-    bottom   = stbi_load((std::string(prefix) + group[3]).c_str(), &width, &height, &depth, 0);
-    front    = stbi_load((std::string(prefix) + group[4]).c_str(), &width, &height, &depth, 0);
-    back     = stbi_load((std::string(prefix) + group[5]).c_str(), &width, &height, &depth, 0);
-
-    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, right);
-    glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, left);
-    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, front);
-    glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, back);
-    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, top);
-    glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, bottom);
-
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
-    stbi_image_free((void *)right);
-    stbi_image_free((void *)left);
-    stbi_image_free((void *)top);
-	stbi_image_free((void *)bottom);
-	stbi_image_free((void *)front);
-	stbi_image_free((void *)back);
-
-    return tex;
-}
-
 void init() {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
-    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
-    // Setup Dear ImGui style
+    ImGuiIO& io = ImGui::GetIO();
     ImGui::StyleColorsDark();
-    // ImGui::StyleColorsLight();
-    // ImGui::StyleColorsClassic();
-    // Setup Platform/Renderer backends
     ImGui_ImplGLUT_Init();
     ImGui_ImplGLUT_InstallFuncs();
     ImGui_ImplOpenGL2_Init();
@@ -148,46 +56,27 @@ void init() {
     light.diffuse   = glm::vec3(1.f, 1.f, 1.f);
     light.specular  = glm::vec3(1.f, 1.0f, 1.0f);
 
-    // viewPos = glm::vec3(2.0f + offset_x, 2.0f, 0.0f + offset_z);
-    // viewDir = glm::vec3(2.0f + offset_x, 2.0f, 10.0f + offset_z);
-    // viewRot = glm::vec3(1.f, 1.f, 1.f);
-    // viewPos = glm::vec3(-2.0f, 0.0f, -2.0f);
-    // viewDir = glm::vec3(0.0f, 0.0f, 0.0f);
-    transform = glm::mat4(1.0f);
-    //view = glm::lookAt(viewPos, viewDir, glm::vec3(0.0f, 1.0f, 0.0f));
-    //projection = glm::perspective(glm::radians(60.0f), width_w / height_w, 0.1f, 100.0f);
-
     shader3.init("../shader/coords_v.glsl", "../shader/coords_f.glsl");
     shader_sky.init("../shader/sky_box_v.glsl", "../shader/sky_box_f.glsl");
     coords.init();
-    // sky_box.set_shader(shader_sky.ID);
-    // sky_box.no_fragment_variable = true;
-    // sky_box.attribute_n = 1;
-    // sky_box.attributes_m = {3};
-    // sky_box.set_not_normal();
-    // sky_box.load3d("../../asset/cube.obj", false);
-    // sky_box.prepare();
 
-    
-    glGenVertexArrays(1, &skyboxVAO);
-    glGenBuffers(1, &skyboxVBO);
-    glBindVertexArray(skyboxVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glBindVertexArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    sky_tex = create_sky("../asset/");
-    std::cout << "-- create sky box texture id : " << sky_tex << std::endl;
+    skybox_m.prepare();
+    std::vector<std::string> skys = {
+        "../asset/default_sky_box_side.jpg", 
+        "../asset/default_sky_box_side.jpg", 
+        "../asset/default_sky_box_sky.jpg", 
+        "../asset/default_sky_box_ground.jpg",
+        "../asset/default_sky_box_side.jpg", 
+        "../asset/default_sky_box_side.jpg"
+    };
+    sky_tex = skybox_t::create_sky(skys);
     shader_sky.use();
     shader_sky.setInt("skybox", 0);
 }
 
 void reshape(int width, int height) {
 	std::cout << "window height_w : " << height_w << ", width_w : " << width_w << ", heigth : " << height << ", width : " << width << std::endl;
-	width_w = (float)glutGet(GLUT_WINDOW_WIDTH);
+	width_w  = (float)glutGet(GLUT_WINDOW_WIDTH);
 	height_w = (float)glutGet(GLUT_WINDOW_HEIGHT);
     glViewport(0, 0, width_w, height_w);
 }
@@ -200,8 +89,8 @@ void display() {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_MULTISAMPLE);
     glDepthFunc(GL_LESS);
+    transform = glm::mat4(1.0f);
     viewPos = glm::vec3(offset_x, offset_y, offset_z);
-	// std::cout << "window height : " << height_w << ", width : " << width_w << std::endl;
     viewDir.x = viewPos.x + 10 * sin(2 * _PI_ * alpha / 360);
     viewDir.z = viewPos.z + 10 * cos(2 * _PI_ * alpha / 360);
     view = glm::lookAt(viewPos, viewDir, glm::vec3(0.0f, 1.0f, 0.0f));
@@ -211,7 +100,7 @@ void display() {
 	height_w = (float) glutGet(GLUT_WINDOW_HEIGHT);
 	glViewport(0, 0, (int) width_w, (int) height_w);
     
-
+    // sky box transform
     transform_sky = glm::mat4(1.0f);
     transform_sky = glm::scale(transform_sky, glm::vec3(scale_p, scale_p, scale_p));
     // transform_sky = glm::translate(transform_sky, glm::vec3(-0.5f, - 0.5f, -0.5f));
@@ -229,10 +118,8 @@ void display() {
     shader3.setMat4("projection", projection);
     shader3.setVec3("viewPos", viewPos);
     coords.render();
-
     //three3D.render();
 
-    // sky box transform
     // glDepthMask(GL_FALSE);
     glDepthFunc(GL_LEQUAL);
     shader_sky.use();
@@ -241,11 +128,12 @@ void display() {
     shader_sky.setMat4("projection", projection);
     shader_sky.setMat4("view", view);
     // sky_box.render();
-    glBindVertexArray(skyboxVAO);
+    // glBindVertexArray(skyboxVAO);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, sky_tex);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
-    glBindVertexArray(0);
+    skybox_m.render();
+    // glDrawArrays(GL_TRIANGLES, 0, 36);
+    // glBindVertexArray(0);
     glDepthFunc(GL_LESS);
     // glDepthMask(GL_TRUE);
 
@@ -283,7 +171,7 @@ int main(int argc, char** argv) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH | GLUT_MULTISAMPLE);
     glutInitWindowSize(width, height);
-    glutInitWindowPosition(500, 0);
+    glutInitWindowPosition(500, 500);
     glutCreateWindow("OpenGL Demo");
     glewInit();
 

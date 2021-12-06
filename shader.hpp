@@ -50,7 +50,7 @@ static std::string read_file(const char *path)
 
 static unsigned int create_shader(int shader_type, const char* source)
 {
-    unsigned int r = glCreateShader(shader_type! ? GL_VERTEX_SHADER : GL_FRAGMENT_SHADER);
+    unsigned int r = glCreateShader(!shader_type ? GL_VERTEX_SHADER : GL_FRAGMENT_SHADER);
     // if (!shader_type) {
     //     r = glCreateShader(GL_VERTEX_SHADER);
     // } else {

@@ -13,12 +13,15 @@ public:
     static std::string dirname(const std::string& path);
     static std::string path_join(const std::string& dir, const std::string& s);
     static std::vector<std::string> path_split(const std::string& path);
-    // Methods have side effect
+    // Methods have side effect & relative platform
+    static bool file_exist(const std::string& path);
     static void list_dir(std::vector<std::string>& ls, const std::string& path, LIST_TYPE ls_type = LIST_TYPE::ALL);
     static std::string subdir_find(const std::string& dir, const std::string& filename);
 };
 
 #if defined(ALL_IMPL)
+
+#include <exception>
 
 std::string smartfs::vector_join(const std::string& demi, const std::vector<std::string>& v)
 {
@@ -76,6 +79,7 @@ std::string smartfs::subdir_find(const std::string& dir, const std::string& file
 
 #include <fcntl.h>
 #include <dirent.h>
+#include <unistd.h>
 #include <sys/stat.h>
 #include <bits/struct_stat.h>
 
@@ -84,6 +88,11 @@ bool smartfs::is_dir(const std::string& path)
     struct stat path_st{};
     stat(path.c_str(), &path_st);
     return S_ISDIR(path_st.st_mode);
+}
+
+bool smartfs::file_exist(const std::string& path)
+{
+    return access(path.c_str(), F_OK) != -1;
 }
 
 void smartfs::list_dir(std::vector<std::string>& ls, const std::string& path, LIST_TYPE ls_type)
@@ -116,24 +125,38 @@ void smartfs::list_dir(std::vector<std::string>& ls, const std::string& path, LI
 
 bool smartfs::is_dir(const std::string& path)
 {
+    throw std::runtime_error("unimplemented is_dir in win32");
+    return false;
+}
+
+bool smartfs::file_exist(const std::string& path)
+{
+    throw std::runtime_error("unimplemented file_exist in win32");
     return false;
 }
 
 void smartfs::list_dir(std::vector<std::string>& ls, const std::string& path, LIST_TYPE ls_type)
 {
-
+    throw std::runtime_error("unimplemented list_dir in win32");
 }
 
 #elif __WINDOWS_
 
 bool smartfs::is_dir(const std::string& path)
 {
+    throw std::runtime_error("unimplemented is_dir in windows");
+    return false;
+}
+
+bool smartfs::file_exist(const std::string& path)
+{
+    throw std::runtime_error("unimplemented file_exist in windows");
     return false;
 }
 
 void smartfs::list_dir(std::vector<std::string>& ls, const std::string& path, LIST_TYPE ls_type)
 {
-    
+    throw std::runtime_error("unimplemented list_dir in windows");
 }
 
 #endif

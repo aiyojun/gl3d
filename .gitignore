@@ -94,3 +94,17 @@ imDemo/CMakeCache.txt
 imDemo/imDemo
 
 imDemo/Makefile
+
+skyDemo/CMakeFiles/
+
+skyDemo/cmake_install.cmake
+
+skyDemo/CMakeCache.txt
+
+skyDemo/fs.cpp
+
+skyDemo/imgui.ini
+
+skyDemo/Makefile
+
+skyDemo/skyDemo

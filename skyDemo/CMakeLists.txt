@@ -24,7 +24,7 @@ else()
 endif()
 
 set(SOURCE_FILES
-  fs.cpp
+  main.cpp
   ${IMGUI_ROOT}/imgui.cpp
   ${IMGUI_ROOT}/imgui_demo.cpp
   ${IMGUI_ROOT}/imgui_draw.cpp
