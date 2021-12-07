@@ -71,7 +71,7 @@ void init() {
     light.ia = 0.3f;
     light.id = 0.3f;
     light.is = 0.3f;
-    light.dir = glm::vec3(-1.f, -1.f, -1.f);
+    light.dir = glm::vec3(0.f, -1.f, 0.f);
     light.color = glm::vec3(1.f, 1.f, 1.f);
     clear_color = ImVec4(1.f, 1.f, 1.f, 1.00f);
     clear_color_kd = ImVec4(0.5f, 0.5f, 0.5f, 1.00f);
