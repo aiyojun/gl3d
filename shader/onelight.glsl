@@ -16,7 +16,7 @@ void main()
 {
     gl_Position = projection * view * transform * vec4(aPos, 1.0);
 
-    normal = aNormal;
+    normal = vec3(transform * vec4(aNormal, 1.0)) - vec3(transform * (vec4(0.0, 0.0, 0.0, 1.0)));
     FragPos = aPos;
     TexCoords = aTexCoords;
 }
@@ -41,7 +41,7 @@ void main()
     vec3 vd_norm  = normalize(normal);
     vec3 vd_view  = normalize(viewPos - FragPos);
     vec3 vd_refl  = reflect(normalize(ray.dir), vd_norm);
-    float diff    = max(dot(- normalize(ray.dir), vd_norm), 0.0);
+    float diff    = max(dot(normalize(-ray.dir), vd_norm), 0.0);
     float spec    = pow(max(dot(vd_view, vd_refl), 0.0), material.shininess);
     vec3 ambient = vec3(0.0), diffuse = vec3(0.0), specular = vec3(0.0);
     if (rendering == 200) {

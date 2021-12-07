@@ -27,6 +27,7 @@ private:
 
 #if defined(ALL_IMPL)
 
+#include<direct.h>
 #include <exception>
 
 std::vector<std::string> smartfs::finding_cache;
@@ -103,6 +104,14 @@ std::string smartfs::subdir_find(const std::string& dir, const std::string& file
     return "";
 }
 
+
+std::string smartfs::runtime_path()
+{
+    char buf[512] = {0};
+    if (!getcwd(buf, 512)) return "";
+    return std::move(std::string(buf));
+}
+
 #ifdef linux
 
 #include <fcntl.h>
@@ -122,13 +131,6 @@ bool smartfs::is_dir(const std::string& path)
 bool smartfs::file_exist(const std::string& path)
 {
     return access(path.c_str(), F_OK) != -1;
-}
-
-std::string smartfs::runtime_path()
-{
-    char buf[512] = {0};
-    if (!getcwd(buf, 512)) return "";
-    return std::move(std::string(buf));
 }
 
 std::string smartfs::prefix(const std::string& file_path, const std::string& node)
@@ -171,31 +173,60 @@ void smartfs::list_dir(std::vector<std::string>& ls, const std::string& path, LI
 
 #elif _WIN32
 
+#include <io.h>
+#include <windows.h>
+#include <cstring>
+
 bool smartfs::is_dir(const std::string& path)
 {
-    throw std::runtime_error("unimplemented is_dir in win32");
-    return false;
+    WIN32_FIND_DATAA FindFileData;
+    // throw std::runtime_error("unimplemented is_dir in win32");
+    return FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ? true : false;
 }
 
 bool smartfs::file_exist(const std::string& path)
 {
-    throw std::runtime_error("unimplemented file_exist in win32");
-    return false;
+    // throw std::runtime_error("unimplemented file_exist in win32");
+    return access(path.c_str(), 0) == 0;
 }
 
-std::string smartfs::runtime_path()
-{
-    return "";
-}
+// std::string smartfs::runtime_path()
+// {
+//     return "";
+// }
 
 std::string smartfs::prefix(const std::string& file_path, const std::string& node)
 {
+	// GetModuleFileName(NULL, szPath, sizeof(szPath) - 1);
     return "";
 }
 
 void smartfs::list_dir(std::vector<std::string>& ls, const std::string& path, LIST_TYPE ls_type)
 {
-    throw std::runtime_error("unimplemented list_dir in win32");
+    // throw std::runtime_error("unimplemented list_dir in win32");
+	WIN32_FIND_DATA findData;
+    HANDLE hFind = FindFirstFile((path + "/*.*").c_str(), &findData);
+    if (hFind == INVALID_HANDLE_VALUE) return;
+    LARGE_INTEGER size;
+    do {
+        std::string p_name(findData.cFileName);
+        if (p_name == "." || p_name == "..") continue;
+        int isDir = findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
+        if (ls_type == LIST_TYPE::ONLY_DIR) {
+            if (isDir)
+                ls.emplace_back(p_name);
+        } else if (ls_type == LIST_TYPE::ONLY_FILE) {
+            if (!isDir)
+                ls.emplace_back(p_name);
+        } else if (ls_type == LIST_TYPE::RECURSE) {
+            if (isDir)
+                list_dir(ls, path_join(path, p_name), LIST_TYPE::RECURSE);
+            else
+                ls.emplace_back(path_join(path, p_name));
+        } else {
+            ls.emplace_back(std::string(p_name));
+        }
+	} while (FindNextFile(hFind, &findData));
 }
 
 #elif __WINDOWS_
@@ -212,10 +243,10 @@ bool smartfs::file_exist(const std::string& path)
     return false;
 }
 
-std::string smartfs::runtime_path()
-{
-    return "";
-}
+// std::string smartfs::runtime_path()
+// {
+//     return "";
+// }
 
 std::string smartfs::prefix(const std::string& file_path, const std::string& node)
 {

@@ -25,7 +25,7 @@ ray_t light;
 skybox_t skybox; unsigned int sky_tex = 0;
 three3d_t three3D;
 static ImVec4 clear_color, clear_color_kd, clear_color_ks;
-bool use_default = false;
+bool use_default = true;
 float alpha = 3.1415926;
 float offset_x = 0;
 float offset_y = 1;
@@ -73,7 +73,7 @@ void init() {
     light.is = 0.3f;
     light.dir = glm::vec3(0.f, -1.f, 0.f);
     light.color = glm::vec3(1.f, 1.f, 1.f);
-    clear_color = ImVec4(1.f, 1.f, 1.f, 1.00f);
+    clear_color = ImVec4(0.9f, 0.9f, 0.9f, 1.00f);
     clear_color_kd = ImVec4(0.5f, 0.5f, 0.5f, 1.00f);
     clear_color_ks = ImVec4(0.0f, 0.0f, 0.0f, 1.00f);
 
@@ -125,7 +125,6 @@ void display() {
     while (spindle_alpha >= 360.f) spindle_alpha = (float) (spindle_alpha - 360.f);
     last_angle = spindle_alpha;
     last_time = now;
-//    spindle_alpha = (float) ((double) (jlib::GetSystemCurrentMs() - begin_time) / 1000 * 2 * _PI_ * spindle_speed);
 
     transform = glm::mat4(1.0f);
     transform = glm::translate(transform, glm::vec3(-gravity_point.x, -gravity_point.y, -gravity_point.z));
@@ -185,7 +184,7 @@ void display() {
     ImGui_ImplOpenGL2_NewFrame();
     ImGui_ImplGLUT_NewFrame();
     ImGui::Begin("View Control");
-    ImGui::SliderFloat("speed", &spindle_speed, 0.01f, 0.5f);
+    ImGui::SliderFloat("speed", &spindle_speed, 0.01f, 1.0f);
     ImGui::SliderFloat("alpha", &alpha, 0.0f, 360.f);
     ImGui::SliderFloat("move x", &offset_x, -100.f, 100.f);
     ImGui::SliderFloat("move y", &offset_y, -100.f, 100.f);
@@ -226,7 +225,7 @@ int main(int argc, char** argv) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH | GLUT_MULTISAMPLE);
     glutInitWindowSize(width, height);
-    glutInitWindowPosition(1000, 1000);
+    glutInitWindowPosition(500, 000);
     glutCreateWindow("OpenGL Demo");
     glewInit();
 

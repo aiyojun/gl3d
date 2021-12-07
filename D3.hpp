@@ -261,10 +261,10 @@ void three3d_t::prepare()
 //            if (!no_fragment_variable) {
             glUseProgram(shader_uid);
             glUniform1i(glGetUniformLocation(shader_uid, "rendering"), 100);
-//            meshes[i].material.shininess = 0.f;
-//            meshes[i].material.Ka = glm::vec3(1.f, 1.f, 1.f);
-//            meshes[i].material.Kd = glm::vec3(0.5f, 0.5f, 0.5f);
-//            meshes[i].material.Ks = glm::vec3(0.0f, 0.0f, 0.0f);
+        //    meshes[i].material.shininess = 0.f;
+        //    meshes[i].material.Ka = glm::vec3(1.f, 1.f, 1.f);
+        //    meshes[i].material.Kd = glm::vec3(0.5f, 0.5f, 0.5f);
+        //    meshes[i].material.Ks = glm::vec3(0.0f, 0.0f, 0.0f);
             glUniform1f(glGetUniformLocation(shader_uid, "material.shininess"), default_m.shininess);
             glUniform3fv(glGetUniformLocation(shader_uid, "material.Ka"), 1, &(default_m.Ka[0]));
             glUniform3fv(glGetUniformLocation(shader_uid, "material.Kd"), 1, &(default_m.Kd[0]));
