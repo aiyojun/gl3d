@@ -57,8 +57,8 @@ void init() {
     shader_ray.init(smartfs::find("onelight.glsl"));
 
     light.ia = 0.3f;
-    light.id = 1.0f;
-    light.is = 1.0f;
+    light.id = 0.3f;
+    light.is = 0.3f;
     light.dir = glm::vec3(-1.f, -1.f, -1.f);
     light.color = glm::vec3(1.f, 1.f, 1.f);
     clear_color = ImVec4(0.5f, 0.5f, 0.5f, 1.00f);
