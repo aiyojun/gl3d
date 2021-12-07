@@ -21,8 +21,8 @@ void init() {
                  smartfs::find("color_f.glsl").c_str());
     shader1.init(smartfs::find("v.shader").c_str(),
                  smartfs::find("f.shader").c_str());
-    three3D.set_shader(shader0.ID, shader1.ID);
-    three3D.load3d(smartfs::find("cube.obj").c_str(), true);
+//    three3D.set_shader(shader0.ID, shader1.ID);
+    three3D.load3d(smartfs::find("cube.obj").c_str(), shader0.ID, true);
 //    three3D.load3d("../asset/uploads_files_2787791_Mercedes+Benz+GLS+580.obj", false);
     three3D.prepare();
 //    shader0.use();

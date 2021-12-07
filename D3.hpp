@@ -20,16 +20,18 @@ typedef unsigned int index_t;
 
 class three3d_t {
 public:
-    bool no_fragment_variable = false;
+    Material default_m;
+    unsigned int shader_uid;
+//    bool no_fragment_variable = false;
     int attribute_n = 3;
     std::vector<int> attributes_m = {3, 3, 2};
     std::vector<Mesh> meshes;
     std::vector<std::tuple<index_t, index_t, index_t>> ids;
-    std::vector<unsigned int> shader_ids;
-    void set_shader(unsigned int shader);
-    void set_shader(unsigned int shader0, unsigned int shader1);
-    void set_not_normal();
-    void load3d(const char* path, bool mat = true);
+//    std::vector<unsigned int> shader_ids;
+//    void set_shader(unsigned int shader);
+//    void set_shader(unsigned int shader0, unsigned int shader1);
+//    void set_not_normal();
+    void load3d(const std::string& path, unsigned int shader, bool mat = true);
     void prepare();
     void render();
 private:
@@ -39,8 +41,8 @@ private:
 
 #if defined(D3_IMPL) || defined(ALL_IMPL)
 
-inline void three3d_t::set_not_normal()
-{normal_factor = -1;}
+//inline void three3d_t::set_not_normal()
+//{normal_factor = -1;}
 
 Mesh decompose_mesh(
     const aiScene* scene,
@@ -51,7 +53,7 @@ Mesh decompose_mesh(
     for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
         Vertex vertex;
         vertex.position  = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
-        vertex.normal    = glm::vec3(mesh->mNormals[i].x * normal_factor, mesh->mNormals[i].y * normal_factor, mesh->mNormals[i].z * normal_factor);
+        vertex.normal    = glm::vec3(mesh->mNormals[i].x * (float) normal_factor, mesh->mNormals[i].y * (float) normal_factor, mesh->mNormals[i].z * (float) normal_factor);
         vertex.texCoords = mesh->mTextureCoords[0] ? glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y) : glm::vec2(0.0f);
         // vertex.tangent   = glm::vec3(mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z);
         // vertex.bitangent = glm::vec3(mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z);
@@ -183,14 +185,15 @@ unsigned int loadTexture(const std::string& path) {
     return r;
 }
 
-void three3d_t::set_shader(unsigned int shader)
-{shader_ids.clear();shader_ids.emplace_back(shader);}
+//void three3d_t::set_shader(unsigned int shader)
+//{shader_ids.clear();shader_ids.emplace_back(shader);}
+//
+//void three3d_t::set_shader(unsigned int shader0, unsigned int shader1)
+//{shader_ids.clear();shader_ids.emplace_back(shader0);shader_ids.emplace_back(shader1);}
 
-void three3d_t::set_shader(unsigned int shader0, unsigned int shader1)
-{shader_ids.clear();shader_ids.emplace_back(shader0);shader_ids.emplace_back(shader1);}
-
-void three3d_t::load3d(const char *path, bool mat)
+void three3d_t::load3d(const std::string& path, unsigned int shader, bool mat)
 {
+    shader_uid = shader;
     decompose_material = mat;
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(
@@ -237,47 +240,59 @@ void three3d_t::prepare()
 
         ids.emplace_back(std::tuple<index_t, index_t, index_t>(vao, vbo, ebo));
         if (!decompose_material) {
-            if (!no_fragment_variable) {
-                glUseProgram(shader_ids[0]);
-                meshes[i].material.shininess = 2.f;
-                meshes[i].material.Ks = glm::vec3(0.5f, 0.5f, 0.5f);
-                meshes[i].material.Kd = glm::vec3(1.f, 1.f, 1.f);
-                glUniform1f(glGetUniformLocation(shader_ids[0], "material.shininess"), meshes[i].material.shininess);
-                glUniform3fv(glGetUniformLocation(shader_ids[0], "material.diffuse"), 1, &(meshes[i].material.Kd[0]));
-                glUniform3fv(glGetUniformLocation(shader_ids[0], "material.specular"), 1, &(meshes[i].material.Ks[0]));
-            }
+//            if (!no_fragment_variable) {
+            glUseProgram(shader_uid);
+            glUniform1i(glGetUniformLocation(shader_uid, "rendering"), 100);
+//            meshes[i].material.shininess = 0.f;
+//            meshes[i].material.Ka = glm::vec3(1.f, 1.f, 1.f);
+//            meshes[i].material.Kd = glm::vec3(0.5f, 0.5f, 0.5f);
+//            meshes[i].material.Ks = glm::vec3(0.0f, 0.0f, 0.0f);
+            glUniform1f(glGetUniformLocation(shader_uid, "material.shininess"), default_m.shininess);
+            glUniform3fv(glGetUniformLocation(shader_uid, "material.Ka"), 1, &(default_m.Ka[0]));
+            glUniform3fv(glGetUniformLocation(shader_uid, "material.Kd"), 1, &(default_m.Kd[0]));
+            glUniform3fv(glGetUniformLocation(shader_uid, "material.Ks"), 1, &(default_m.Ks[0]));
+//            }
             continue;
         }
 
-        int j = 0;
-        if (!meshes[i].material.Ta.path.empty()) {
-            meshes[i].material.Ta.id = loadTexture(meshes[i].material.Ta.path);
-            if (meshes[i].material.Ta.id != 0) {
-                glUseProgram(shader_ids[1]);
-                glUniform1i(glGetUniformLocation(shader_ids[1], "material.ambient"), j++);
-            }
-        }
+        int j = 100, rendering = 0;
+        glUseProgram(shader_uid);
         if (!meshes[i].material.Td.path.empty()) {
             meshes[i].material.Td.id = loadTexture(meshes[i].material.Td.path);
             if (meshes[i].material.Td.id != 0) {
-                glUseProgram(shader_ids[1]);
-                glUniform1i(glGetUniformLocation(shader_ids[1], "material.diffuse"), j++);
+                glUniform1i(glGetUniformLocation(shader_uid, "material.map_Kd"), j++);
+                rendering = 200;
+            }
+        }
+        if (!meshes[i].material.Ta.path.empty()) {
+            meshes[i].material.Ta.id = loadTexture(meshes[i].material.Ta.path);
+            if (meshes[i].material.Ta.id != 0) {
+                glUniform1i(glGetUniformLocation(shader_uid, "material.map_Ka"), j++);
+                rendering += 001;
             }
         }
         if (!meshes[i].material.Ts.path.empty()) {
             meshes[i].material.Ts.id = loadTexture(meshes[i].material.Ts.path);
             if (meshes[i].material.Ts.id != 0) {
-                glUseProgram(shader_ids[1]);
-                glUniform1i(glGetUniformLocation(shader_ids[1], "material.specular"), j++);
+                glUniform1i(glGetUniformLocation(shader_uid, "material.map_Ks"), j++);
+                rendering += 010;
             }
         }
+        glUseProgram(shader_uid);
+        glUniform1i(glGetUniformLocation(shader_uid, "rendering"), rendering);
         //std::cout << ">> xx j : " << j << "; decompose : " << decompose_material << std::endl;
         if (j == 0) {
-            glUseProgram(shader_ids[0]);
+//            meshes[i].material.shininess = 0.f;
+//            meshes[i].material.Ka = glm::vec3(1.f, 1.f, 1.f);
+//            meshes[i].material.Kd = glm::vec3(0.5f, 0.5f, 0.5f);
+//            meshes[i].material.Ks = glm::vec3(0.0f, 0.0f, 0.0f);
+            glUseProgram(shader_uid);
             // if (decompose_material) {
-            glUniform1f(glGetUniformLocation(shader_ids[0], "material.shininess"), meshes[i].material.shininess);
-            glUniform3fv(glGetUniformLocation(shader_ids[0], "material.diffuse"), 1, &(meshes[i].material.Kd[0]));
-            glUniform3fv(glGetUniformLocation(shader_ids[0], "material.specular"), 1, &(meshes[i].material.Ks[0]));
+//            glUniform1i(glGetUniformLocation(shader_ids[0], "rendering"), rendering);
+            glUniform1f(glGetUniformLocation(shader_uid, "material.shininess"), meshes[i].material.shininess);
+            glUniform3fv(glGetUniformLocation(shader_uid, "material.Ka"), 1, &(meshes[i].material.Ka[0]));
+            glUniform3fv(glGetUniformLocation(shader_uid, "material.Kd"), 1, &(meshes[i].material.Kd[0]));
+            glUniform3fv(glGetUniformLocation(shader_uid, "material.Ks"), 1, &(meshes[i].material.Ks[0]));
             // } else {
             //     meshes[i].material.shininess = 2.f;
             //     meshes[i].material.Ks = glm::vec3(0.5f, 0.5f, 0.5f);
@@ -294,31 +309,37 @@ void three3d_t::prepare()
 void three3d_t::render()
 {
     for (int i = 0; i < meshes.size(); i++) {
+        int rendering = 0;
         if (decompose_material) {
             int j = 0;
             Material& material = meshes[i].material;
             if (!material.Ta.path.empty() && material.Ta.id) {
                 glActiveTexture(GL_TEXTURE0 + j);
                 glBindTexture(GL_TEXTURE_2D, material.Ta.id);
+                rendering += 1;
                 j++;
             }
             if (!material.Td.path.empty() && material.Td.id) {
                 glActiveTexture(GL_TEXTURE0 + j);
                 glBindTexture(GL_TEXTURE_2D, material.Td.id);
+                rendering += 200;
                 j++;
             }
             if (!material.Ts.path.empty() && material.Ts.id) {
                 glActiveTexture(GL_TEXTURE0 + j);
                 glBindTexture(GL_TEXTURE_2D, material.Ts.id);
+                rendering += 10;
                 j++;
             }
             /* Here, watch out use-shader position! It must before shader.set(...). */
-            glUseProgram(j > 0 && shader_ids.size() > 1 ? shader_ids[1] : shader_ids[0]);
-        } else {
-            if (no_fragment_variable) {
-                glUseProgram(shader_ids[0]);
-            }
-        }
+//            glUseProgram(j > 0 && shader_ids.size() > 1 ? shader_ids[1] : shader_ids[0]);
+        }// else {
+//            if (no_fragment_variable) {
+//                glUseProgram(shader_ids[0]);
+//            }
+//        }
+        glUseProgram(shader_uid);
+        glUniform1i(glGetUniformLocation(shader_uid, "rendering"), rendering);
         glBindVertexArray(std::get<0>(ids[i]));
         glDrawElements(GL_TRIANGLES, meshes[i].indices.size(), GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);

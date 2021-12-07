@@ -63,9 +63,9 @@ void init() {
             smartfs::find("coords_v.glsl").c_str(),
             smartfs::find("coords_f.glsl").c_str());
     coords.init();
-    three3D.set_shader(shader0.ID, shader1.ID);
-    three3D.load3d(smartfs::find("cube.obj").c_str(), true);
-//    three3D.load3d("../asset/uploads_files_2787791_Mercedes+Benz+GLS+580.obj", false);
+//    three3D.set_shader(shader0.ID, shader1.ID);
+    // three3D.load3d(smartfs::find("cube.obj").c_str(), true);
+   three3D.load3d(smartfs::find("Audi_R8_2017.obj"), shader0.ID, true);
     three3D.prepare();
 }
 
@@ -118,7 +118,7 @@ void display() {
     shader1.setVec3("light.diffuse"      , light.diffuse);
     shader1.setVec3("light.specular"     , light.specular);
 
-    //three3D.render();
+    three3D.render();
     glUseProgram(0);
     ImGui_ImplOpenGL2_NewFrame();
     ImGui_ImplGLUT_NewFrame();

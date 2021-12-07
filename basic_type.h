@@ -31,13 +31,13 @@ struct Texture {
 };
 
 struct Material {
-    glm::vec3 Ka;
-    glm::vec3 Kd;
-    glm::vec3 Ks;
+    glm::vec3 Ka = glm::vec3(0.f);
+    glm::vec3 Kd = glm::vec3(0.f);
+    glm::vec3 Ks = glm::vec3(0.f);
     Texture Ta;
     Texture Td;
     Texture Ts;
-    float shininess;
+    float shininess = 0.f;
     Material(): Ka(0.0f), Kd(0.0f), Ks(0.0f), Ta(), Td(), Ts(), shininess(0) {}
 };
 
@@ -75,4 +75,9 @@ struct Light {
     glm::vec3 ambient;
     glm::vec3 diffuse;
     glm::vec3 specular;
+};
+
+struct ray_t {
+    float ia, id, is;
+    glm::vec3 dir, pos, color;
 };
