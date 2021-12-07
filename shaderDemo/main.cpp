@@ -53,12 +53,6 @@ void init() {
     ImGui_ImplGLUT_InstallFuncs();
     ImGui_ImplOpenGL2_Init();
 
-
-//    light.direction = glm::vec3(-1.f, -1.f, -1.f);
-//    light.ambient   = glm::vec3(1.f, 1.f, 1.f);
-//    light.diffuse   = glm::vec3(1.f, 1.f, 1.f);
-//    light.specular  = glm::vec3(1.f, 1.0f, 1.0f);
-
     smartfs::cache(smartfs::prefix(smartfs::runtime_path(), "gl3d"));
     shader_ray.init(smartfs::find("onelight.glsl"));
 
@@ -67,6 +61,7 @@ void init() {
     light.is = 1.0f;
     light.dir = glm::vec3(-1.f, -1.f, -1.f);
     light.color = glm::vec3(1.f, 1.f, 1.f);
+    clear_color = ImVec4(0.5f, 0.5f, 0.5f, 1.00f);
 
     skybox.prepare();
     std::vector<std::string> skys = {
@@ -86,29 +81,7 @@ void init() {
     coords.init();
 
     three3D.load3d(smartfs::find("Audi_R8_2017.obj"), shader_ray.shader_id, true);
-    clear_color = ImVec4(0.5f, 0.5f, 0.5f, 1.00f);
-//    three3D.load3d(smartfs::find("Audi_R8_2017.obj"), shader_ray.shader_id, true);
     three3D.prepare();
-//    shader3.init(
-//            smartfs::find("coords_v.glsl").c_str(),
-//            smartfs::find("coords_f.glsl").c_str());
-//    shader_sky.init(
-//            smartfs::find("sky_box_v.glsl").c_str(),
-//            smartfs::find("sky_box_f.glsl").c_str());
-//    coords.init();
-
-//    skybox_m.prepare();
-//    std::vector<std::string> skys = {
-//            smartfs::find("default_sky_box_side.jpg"),
-//            smartfs::find("default_sky_box_side.jpg"),
-//            smartfs::find("default_sky_box_sky.jpg"),
-//            smartfs::find("default_sky_box_ground.jpg"),
-//            smartfs::find("default_sky_box_side.jpg"),
-//            smartfs::find("default_sky_box_side.jpg")
-//    };
-//    sky_tex = skybox_t::create_sky(skys);
-//    shader_sky.use();
-//    shader_sky.setInt("skybox", 0);
 }
 
 
@@ -120,10 +93,8 @@ void reshape(int width, int height) {
 }
 
 float scale_c = 100.f;
-//float scale_p = 2.f;
 
 void display() {
-//    std::cout << ">> diplay ...\n";
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_MULTISAMPLE);
@@ -146,24 +117,6 @@ void display() {
     shader_co.set_vec3("viewPos", viewPos);
     coords.render();
 
-    // sky box transform
-//    transform_sky = glm::mat4(1.0f);
-//    transform_sky = glm::scale(transform_sky, glm::vec3(scale_p, scale_p, scale_p));
-    // transform_sky = glm::translate(transform_sky, glm::vec3(-0.5f, - 0.5f, -0.5f));
-//    transform_sky[3][0] = transform_sky[3][0] + viewPos.x;
-//    transform_sky[3][1] = transform_sky[3][1] + viewPos.y;
-//    transform_sky[3][2] = transform_sky[3][2] + viewPos.z;
-    // transform_sky = glm::translate(transform_sky, glm::vec3(0, -0.5f * scale_p, 0));
-    // transform_sky = glm::translate(transform_sky, glm::vec3(0, 0, -0.5f * scale_p));
-
-
-    // transform_sky = glm::translate(transform_sky, viewPos);
-//    shader3.use();
-//    shader3.setMat4("view", view);
-//    shader3.setMat4("transform", transform);
-//    shader3.setMat4("projection", projection);
-//    shader3.setVec3("viewPos", viewPos);
-//    coords.render();
     shader_ray.use();
     shader_ray.set_float("ray.ia", light.ia);
     shader_ray.set_float("ray.id", light.id);
@@ -203,7 +156,6 @@ void display() {
     ImGui_ImplGLUT_NewFrame();
     ImGui::Begin("View Control");
     ImGui::SliderFloat("alpha", &alpha, 0.0f, 360.f);
-//    ImGui::SliderFloat("sky", &scale_p, 0.1f, 100.f);
     ImGui::SliderFloat("move x", &offset_x, -100.f, 100.f);
     ImGui::SliderFloat("move y", &offset_y, -100.f, 100.f);
     ImGui::SliderFloat("move z", &offset_z, -100.f, 100.f);
