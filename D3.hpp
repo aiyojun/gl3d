@@ -20,6 +20,7 @@ typedef unsigned int index_t;
 
 class three3d_t {
 public:
+    glm::vec3 edge_min = glm::vec3(0.f), edge_max = glm::vec3(0.f);
     Material default_m;
     unsigned int shader_uid;
 //    bool no_fragment_variable = false;
@@ -35,6 +36,17 @@ public:
     void prepare();
     void render();
 private:
+    Mesh decompose_mesh(
+            const aiScene* scene,
+            const aiMesh* mesh,
+            bool decompose_material = true,
+            int normal_factor = 1);
+    void iterate_mesh(
+            const aiScene* scene,
+            const aiNode* node,
+            std::vector<Mesh>& meshes,
+            bool decompose_material,
+            int depth, int normal_factor = 1);
     int normal_factor = 1;
     bool decompose_material;
 };
@@ -44,9 +56,9 @@ private:
 //inline void three3d_t::set_not_normal()
 //{normal_factor = -1;}
 
-Mesh decompose_mesh(
+Mesh three3d_t::decompose_mesh(
     const aiScene* scene,
-    const aiMesh* mesh, bool decompose_material = true, int normal_factor = 1)
+    const aiMesh* mesh, bool decompose_material, int normal_factor)
 {
     std::vector<Vertex> tmp_v;
     std::vector<index_t> tmp_i;
@@ -57,6 +69,12 @@ Mesh decompose_mesh(
         vertex.texCoords = mesh->mTextureCoords[0] ? glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y) : glm::vec2(0.0f);
         // vertex.tangent   = glm::vec3(mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z);
         // vertex.bitangent = glm::vec3(mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z);
+        if (vertex.position.x > edge_max.x) edge_max.x = vertex.position.x;
+        if (vertex.position.x < edge_min.x) edge_min.x = vertex.position.x;
+        if (vertex.position.y > edge_max.y) edge_max.y = vertex.position.y;
+        if (vertex.position.y < edge_min.y) edge_min.y = vertex.position.y;
+        if (vertex.position.z > edge_max.z) edge_max.z = vertex.position.z;
+        if (vertex.position.z < edge_min.z) edge_min.z = vertex.position.z;
         tmp_v.emplace_back(vertex);
         // std::cout << "-- vertex : " << mesh->mVertices[i].x << ", " << mesh->mVertices[i].y << ", " << mesh->mVertices[i].z
         //     << "; normal : " << mesh->mNormals[i].x << ", " << mesh->mNormals[i].y << ", " << mesh->mNormals[i].z
@@ -149,12 +167,12 @@ Mesh decompose_mesh(
     return {tmp_v, tmp_i, tmp_m};
 }
 
-void iterate_mesh(
+void three3d_t::iterate_mesh(
     const aiScene* scene,
     const aiNode* node, 
     std::vector<Mesh>& meshes, 
     bool decompose_material, 
-    /* reserved for debugging */ int depth, int normal_factor = 1)
+    /* reserved for debugging */ int depth, int normal_factor)
 {
     for (unsigned int i = 0; i < node->mNumMeshes; i++)
         meshes.emplace_back(decompose_mesh(scene, scene->mMeshes[node->mMeshes[i]], decompose_material, normal_factor));

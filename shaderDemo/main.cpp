@@ -8,6 +8,7 @@
 #include <imgui_impl_glut.h>
 #include <imgui_impl_opengl2.h>
 #define ALL_IMPL
+#include "../basic_ops.hpp"
 #include "../shader.h"
 #include "../D3.hpp"
 #include "../coords.hpp"
@@ -23,12 +24,12 @@ shader_t shader_sky;
 ray_t light;
 skybox_t skybox; unsigned int sky_tex = 0;
 three3d_t three3D;
-static ImVec4 clear_color;
+static ImVec4 clear_color, clear_color_kd, clear_color_ks;
 bool use_default = false;
-float alpha = 0;
+float alpha = 3.1415926;
 float offset_x = 0;
 float offset_y = 1;
-float offset_z = -5;
+float offset_z = -8;
 
 glm::vec3 viewPos;
 glm::vec3 viewDir;
@@ -41,7 +42,18 @@ glm::mat4 transform_sky;
 shader_t shader_co;
 coords_t  coords;
 
+glm::vec3 gravity_point = glm::vec3(0.f);
+float spindle_alpha = 0.0f;
+float spindle_speed = 0.025f;
+float last_angle = 0.f;
+long last_time = 0l;
+long begin_time = 0l;
+glm::vec2 spindle = glm::vec2(0.f);
+
+int rotate_factor = 1;
+
 void button_use() {use_default = !use_default;}
+void button_switch_rotate() {rotate_factor = rotate_factor ? 0 : 1;}
 
 
 void init() {
@@ -61,7 +73,9 @@ void init() {
     light.is = 0.3f;
     light.dir = glm::vec3(-1.f, -1.f, -1.f);
     light.color = glm::vec3(1.f, 1.f, 1.f);
-    clear_color = ImVec4(0.5f, 0.5f, 0.5f, 1.00f);
+    clear_color = ImVec4(1.f, 1.f, 1.f, 1.00f);
+    clear_color_kd = ImVec4(0.5f, 0.5f, 0.5f, 1.00f);
+    clear_color_ks = ImVec4(0.0f, 0.0f, 0.0f, 1.00f);
 
     skybox.prepare();
     std::vector<std::string> skys = {
@@ -80,8 +94,15 @@ void init() {
     shader_co.init(smartfs::find("coords.glsl"));
     coords.init();
 
-    three3D.load3d(smartfs::find("Audi_R8_2017.obj"), shader_ray.shader_id, true);
+    three3D.load3d(smartfs::find("Audi_R8_2017.obj"), shader_ray.shader_id, false);
     three3D.prepare();
+    begin_time = jlib::GetSystemCurrentMs();
+    last_time = begin_time;
+    spindle.x = (three3D.edge_min.x + three3D.edge_max.x) / 2;
+    spindle.y = (three3D.edge_min.z + three3D.edge_max.z) / 2;
+    gravity_point.x = spindle.x;
+    gravity_point.y = (three3D.edge_min.y + three3D.edge_max.y) / 2;
+    gravity_point.z = spindle.y;
 }
 
 
@@ -99,7 +120,16 @@ void display() {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_MULTISAMPLE);
     glDepthFunc(GL_LESS);
+    long now = jlib::GetSystemCurrentMs();
+    spindle_alpha = last_angle + (float) ((double) (now - last_time) / 1000 * 360.f * spindle_speed * rotate_factor);
+    while (spindle_alpha >= 360.f) spindle_alpha = (float) (spindle_alpha - 360.f);
+    last_angle = spindle_alpha;
+    last_time = now;
+//    spindle_alpha = (float) ((double) (jlib::GetSystemCurrentMs() - begin_time) / 1000 * 2 * _PI_ * spindle_speed);
+
     transform = glm::mat4(1.0f);
+    transform = glm::translate(transform, glm::vec3(-gravity_point.x, -gravity_point.y, -gravity_point.z));
+    transform = glm::rotate(transform, glm::radians(spindle_alpha), glm::vec3(0.f, 1.0f, 0.0f));
     viewPos = glm::vec3(offset_x, offset_y, offset_z);
     viewDir.x = viewPos.x + (float) (10.f * sin(2 * _PI_ * alpha / 360));
     viewDir.z = viewPos.z + (float) (10.f * cos(2 * _PI_ * alpha / 360));
@@ -130,8 +160,8 @@ void display() {
     if (use_default) {
         float d = 1.f, s = 1.f;
         shader_ray.set_vec3("material.Ka", glm::vec3(clear_color.x, clear_color.y, clear_color.z));
-        shader_ray.set_vec3("material.Kd", glm::vec3(d * clear_color.x, d * clear_color.y, d * clear_color.z));
-        shader_ray.set_vec3("material.Ks", glm::vec3(s * clear_color.x, s * clear_color.y, s * clear_color.z));
+        shader_ray.set_vec3("material.Kd", glm::vec3(d * clear_color_kd.x, d * clear_color_kd.y, d * clear_color_kd.z));
+        shader_ray.set_vec3("material.Ks", glm::vec3(s * clear_color_ks.x, s * clear_color_ks.y, s * clear_color_ks.z));
     }
     three3D.render();
 
@@ -155,6 +185,7 @@ void display() {
     ImGui_ImplOpenGL2_NewFrame();
     ImGui_ImplGLUT_NewFrame();
     ImGui::Begin("View Control");
+    ImGui::SliderFloat("speed", &spindle_speed, 0.01f, 0.5f);
     ImGui::SliderFloat("alpha", &alpha, 0.0f, 360.f);
     ImGui::SliderFloat("move x", &offset_x, -100.f, 100.f);
     ImGui::SliderFloat("move y", &offset_y, -100.f, 100.f);
@@ -165,9 +196,13 @@ void display() {
     // ImGui::SliderFloat("Eye Z", &viewPos.z, scale_c * -1.f, scale_c);
     // ImGui::SliderFloat("Dir X", &viewDir.x, scale_c * -1.f, scale_c);
     ImGui::SliderFloat("Dir Y", &viewDir.y, scale_c * -1.f, scale_c);
-    ImGui::ColorEdit3("Object Color", (float*)&clear_color);
+    ImGui::ColorEdit3("ambient", (float*)&clear_color);
+    ImGui::ColorEdit3("diffuse", (float*)&clear_color_kd);
+    ImGui::ColorEdit3("specular", (float*)&clear_color_ks);
     if (ImGui::Button("Switch Material")) button_use();
     ImGui::InputText("Default Material: ", (char *) (use_default ? "yes" : "no "), 3);
+    if (ImGui::Button("Switch Rotate")) button_switch_rotate();
+    ImGui::InputText("Rotate state: ", (char *) (use_default ? "yes" : "no "), 3);
     // ImGui::SliderFloat("Dir Z", &viewDir.z, scale_c * -1.f, scale_c);
      ImGui::SliderFloat("light x", &light.dir.x, -2.0f, 2.0f);
      ImGui::SliderFloat("light y", &light.dir.y, -2.0f, 2.0f);

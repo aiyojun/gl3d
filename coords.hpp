@@ -31,8 +31,8 @@ private:
 void coords_t::init()
 {
     int idx = 0;
-    // for (int i = 0; i < 1; i++) {
-    for (int i = -100; i < 101; i++) {
+     for (int i = 0; i < 1; i++) {
+//    for (int i = -100; i < 101; i++) {
         vertex_t vertex0, vertex1, vertex2, vertex3;
         vertex0.position = glm::vec3((float) i, 0, -100.f);
         vertex0.color    = i != 0 ? glm::vec3(dim_gray) : glm::vec3(beauty_red);
