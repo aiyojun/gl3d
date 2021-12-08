@@ -192,3 +192,5 @@ ZERO_CHECK.vcxproj.filters
 shaderDemo/Debug/
 
 shaderDemo/shaderDemo.dir/
+
+asset/Audi_R8_2017.mtl
