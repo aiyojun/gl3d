@@ -14,6 +14,7 @@ public:
     static std::string path_join(const std::string& dir, const std::string& s);
     static std::vector<std::string> path_split(const std::string& path);
     static std::string runtime_path();
+    static const std::vector<std::string>& get_cache();
     // Methods have side effect & relative platform
     static bool file_exist(const std::string& path);
     static void cache(const std::string& root);
@@ -27,7 +28,6 @@ private:
 
 #if defined(ALL_IMPL)
 
-#include<direct.h>
 #include <exception>
 
 std::vector<std::string> smartfs::finding_cache;
@@ -69,10 +69,14 @@ std::vector<std::string> smartfs::path_split(const std::string& path)
     return std::move(r);
 }
 
+const std::vector<std::string>& smartfs::get_cache()
+{ return finding_cache; }
+
 void smartfs::cache(const std::string& root)
 {
     finding_cache.clear();
     list_dir(finding_cache, root, LIST_TYPE::RECURSE);
+    std::cout << "Finding Cache:\n" << vector_join("\n  ", finding_cache) << std::endl;
 }
 
 std::string smartfs::find(const std::string& filename)
@@ -105,12 +109,12 @@ std::string smartfs::subdir_find(const std::string& dir, const std::string& file
 }
 
 
-std::string smartfs::runtime_path()
-{
-    char buf[512] = {0};
-    if (!getcwd(buf, 512)) return "";
-    return std::move(std::string(buf));
-}
+//std::string smartfs::runtime_path()
+//{
+//    char buf[512] = {0};
+//    if (!getcwd(buf, 512)) return "";
+//    return std::move(std::string(buf));
+//}
 
 #ifdef linux
 
@@ -120,6 +124,14 @@ std::string smartfs::runtime_path()
 #include <climits>
 #include <sys/stat.h>
 #include <bits/struct_stat.h>
+
+std::string smartfs::runtime_path()
+{
+    char buf[512] = {0};
+    if (!getcwd(buf, 512)) return "";
+    return std::move(std::string(buf));
+}
+
 
 bool smartfs::is_dir(const std::string& path)
 {
@@ -176,6 +188,14 @@ void smartfs::list_dir(std::vector<std::string>& ls, const std::string& path, LI
 #include <io.h>
 #include <windows.h>
 #include <cstring>
+#include <direct.h>
+
+std::string smartfs::runtime_path()
+{
+    char buf[512] = {0};
+    if (!getcwd(buf, 512)) return "";
+    return std::move(std::string(buf));
+}
 
 bool smartfs::is_dir(const std::string& path)
 {
@@ -227,35 +247,6 @@ void smartfs::list_dir(std::vector<std::string>& ls, const std::string& path, LI
             ls.emplace_back(std::string(p_name));
         }
 	} while (FindNextFile(hFind, &findData));
-}
-
-#elif __WINDOWS_
-
-bool smartfs::is_dir(const std::string& path)
-{
-    throw std::runtime_error("unimplemented is_dir in windows");
-    return false;
-}
-
-bool smartfs::file_exist(const std::string& path)
-{
-    throw std::runtime_error("unimplemented file_exist in windows");
-    return false;
-}
-
-// std::string smartfs::runtime_path()
-// {
-//     return "";
-// }
-
-std::string smartfs::prefix(const std::string& file_path, const std::string& node)
-{
-    return "";
-}
-
-void smartfs::list_dir(std::vector<std::string>& ls, const std::string& path, LIST_TYPE ls_type)
-{
-    throw std::runtime_error("unimplemented list_dir in windows");
 }
 
 #endif

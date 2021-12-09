@@ -215,10 +215,15 @@ void three3d_t::load3d(const std::string& path, unsigned int shader, bool mat)
     decompose_material = mat;
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(
-        path, aiProcess_CalcTangentSpace | aiProcess_Triangulate
-        | aiProcess_JoinIdenticalVertices | aiProcess_SortByPType);
+        path,
+        aiProcess_CalcTangentSpace
+        | aiProcess_Triangulate
+        | aiProcess_JoinIdenticalVertices
+        | aiProcess_SortByPType
+        );
     if (!scene) {
-        std::cout << importer.GetErrorString() << std::endl;
+        std::cout << "3D import error: " << importer.GetErrorString() << std::endl;
+        exit(2);
     }
     meshes.clear(); ids.clear();
     iterate_mesh(scene, scene->mRootNode, meshes, decompose_material, 0, normal_factor);
@@ -322,6 +327,10 @@ void three3d_t::prepare()
 
         }
     }
+
+//    std::cout << "-- --- --- ---\n";
+//    std::cout << "-- mesh size  : " << meshes.size() << std::endl;
+//    std::cout << "-- mesh index : " << meshes[0].indices.size() << std::endl;
 }
 
 void three3d_t::render()

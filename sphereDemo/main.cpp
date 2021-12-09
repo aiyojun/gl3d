@@ -25,26 +25,28 @@ vertex_t keep(vertex_t v)
 { return vertex_t {keep(v.x), keep(v.y), keep(v.z), v.i, keep(v.s), keep(v.t)}; }
 
 
-mesh_t g_sphere(float r, int t, int w, int h) {
+mesh_t g_sphere(float r, int t, float w, float h) {
 	// std::cout << "-- 1" << std::endl;
-    float delta_w = (float) w / t, delta_h = (float) h / t, delta_angle = 2 * F_PI / t;
     int t_2 = (int) (t / 2);
     int t_4 = (int) (t / 4);
+    float delta_w = w / t, delta_h = h / t_2, delta_angle = 2 * F_PI / t;
     std::vector<vertex_t> vertices;
     std::vector<std::vector<unsigned int>> vertices_indices;
 	// std::cout << "-- 2" << std::endl;
-    for (int i = 0; i < t_2 + 1; i++) vertices_indices.emplace_back(std::vector<unsigned int>());
+    vertices_indices.reserve(t_2 + 1);
+    for (int i = 0; i < t_2 + 1; i++)
+        vertices_indices.emplace_back(std::vector<unsigned int>());
 
-    {
+    { // bottom point
         int i = - t_4;
         float alpha = delta_angle * i;
         vertex_t _v {
-            r * cos(alpha) * sin(0),
-            r * sin(alpha),
-            r * cos(alpha) * cos(0),
-            vertices.size(),
+            (float) (r * std::cos(alpha) * sin(0)),
+            (float) (r * std::sin(alpha)),
+            (float) (r * std::cos(alpha) * cos(0)),
+            static_cast<unsigned int>(vertices.size()),
             0.f,
-            0.f
+            1.f - 0.f
         };
         vertices_indices[t_4 - i].emplace_back(vertices.size());
         vertices.emplace_back(keep(_v));
@@ -57,24 +59,24 @@ mesh_t g_sphere(float r, int t, int w, int h) {
             float alpha = delta_angle * i;
             if (i == - t_4) { continue; } else if (i == t_4) { continue; }
             vertex_t v {
-                r * cos(alpha) * sin(beta),
-                r * sin(alpha),
-                r * cos(alpha) * cos(beta),
-                vertices.size(),
+                static_cast<float>(r * std::cos(alpha) * std::sin(beta)),
+                static_cast<float>(r * std::sin(alpha)),
+                static_cast<float>(r * std::cos(alpha) * std::cos(beta)),
+                static_cast<unsigned int>(vertices.size()),
                 delta_w * j,
-                delta_h * (t_4 + i)
+                1.f - delta_h * (t_4 + i)
             };
             vertices_indices[t_4 - i].emplace_back(vertices.size());
             vertices.emplace_back(keep(v));
             if (mul_f > 1) {
                 for (int k = 1; k < mul_f; k++) {
                     vertex_t v_ {
-                        r * cos(alpha) * sin(beta + delta_angle / mul_f * k),
-                        r * sin(alpha),
-                        r * cos(alpha) * cos(beta + delta_angle / mul_f * k),
-                        vertices.size(),
+                        static_cast<float>(r * std::cos(alpha) * std::sin(beta + delta_angle / mul_f * k)),
+                        static_cast<float>(r * std::sin(alpha)),
+                        static_cast<float>(r * std::cos(alpha) * std::cos(beta + delta_angle / mul_f * k)),
+                        static_cast<unsigned int>(vertices.size()),
                         delta_w * j + delta_w / mul_f * k,
-                        delta_h * (t_4 + i)
+                        1.f - delta_h * (t_4 + i)
                     };
                     vertices_indices[t_4 - i].emplace_back(vertices.size());
                     vertices.emplace_back(keep(v_));
@@ -83,16 +85,16 @@ mesh_t g_sphere(float r, int t, int w, int h) {
         }
     }
 
-    {
+    { // top point
         int i = t_4;
         float alpha = delta_angle * i;
         vertex_t _v {
-            r * cos(alpha) * sin(0),
-            r * sin(alpha),
-            r * cos(alpha) * cos(0),
-            vertices.size(),
+            static_cast<float>(r * cos(alpha) * sin(0)),
+            static_cast<float>(r * sin(alpha)),
+            static_cast<float>(r * cos(alpha) * cos(0)),
+            static_cast<unsigned int>(vertices.size()),
             0.f,
-            1.f
+            1.f - 1.f
         };
         vertices_indices[t_4 - i].emplace_back(vertices.size());
         vertices.emplace_back(keep(_v));
@@ -220,25 +222,37 @@ mesh_t g_sphere(float r, int t, int w, int h) {
 MAIN_BE
 {
     // std::cout << sin(F_PI / 4) << std::endl;exit(0);
-
-    float t = 40, w = 1, h = 1, r = 4;
+//    std::cout << argv[0] << std::endl;
+//    exit(0);
+    float t = 40, w = 1, h = 1, r = 90;
+    if (argc < 6) {
+        std::cout << "usage: sphere r t w h\n";
+        exit(0);
+    }
+    r = atof(argv[1]);
+    t = atof(argv[2]);
+    w = atof(argv[3]);
+    h = atof(argv[4]);
     std::cout << "# Blender v2.83.5 OBJ File: \n# www.blender.org\nmtllib sphere.mtl\no sphere.obj" << std::endl;
-
     mesh_t sphere = g_sphere(r, t, w, h);
     for (auto& e : sphere.vertices) {
         std::cout << "v " << e.x << " " << e.y << " " << e.z << std::endl;
     }
     for (auto& e : sphere.vertices) {
         std::cout << "vt " << e.s << " " << e.t << std::endl;
+//        std::cout << "vt " << 0 << " " << 0 << std::endl;
     }
     for (auto& e : sphere.vertices) {
-        std::cout << "vn " << e.x << " " << e.y << " " << e.z << std::endl;
+        std::cout << "vn " << -e.x << " " << -e.y << " " << -e.z << std::endl;
     }
-    std::cout << "usemtl polar_white\ns off\n";
+    if (std::string(argv[5]) == "hdr")
+        std::cout << "usemtl hdr\ns off\n";
+    else
+        std::cout << "usemtl polar_white\ns off\n";
     for (int i = 0; i < sphere.indices.size();) {
         std::cout << "f " 
-        << sphere.indices[i + 0] + 1 << "/" << sphere.indices[i + 0] + 1 << "/" << sphere.indices[i + 0] + 1 << " " 
-        << sphere.indices[i + 1] + 1 << "/" << sphere.indices[i + 1] + 1 << "/" << sphere.indices[i + 1] + 1 << " " 
+        << sphere.indices[i + 0] + 1 << "/" << sphere.indices[i + 0] + 1 << "/" << sphere.indices[i + 0] + 1 << " "
+        << sphere.indices[i + 1] + 1 << "/" << sphere.indices[i + 1] + 1 << "/" << sphere.indices[i + 1] + 1 << " "
         << sphere.indices[i + 2] + 1 << "/" << sphere.indices[i + 2] + 1 << "/" << sphere.indices[i + 2] + 1 << std::endl;
         i += 3;
     }
