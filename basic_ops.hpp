@@ -1,5 +1,8 @@
 #pragma once
 
+#define MAIN_BE int main(int argc, char** argv) {
+#define MAIN_EN return 0;}
+
 #include <chrono>
 
 namespace jlib {
