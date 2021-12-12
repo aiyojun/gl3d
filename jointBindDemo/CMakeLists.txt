@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10.0)
 
-project(kineticDemo)
+project(jointBindDemo)
 
 if(UNIX)
     message(STATUS "Using Unix")
@@ -36,8 +36,8 @@ set(SOURCE_FILES
 include_directories(${SYSTEM_INCLUDE} ${EXTRA_INCLUDE})
 
 if(UNIX)
-    add_executable(kineticDemo ${SOURCE_FILES})
-    target_link_libraries(kineticDemo stdc++ GL GLU glut GLEW assimp)
+    add_executable(jointBindDemo ${SOURCE_FILES})
+    target_link_libraries(jointBindDemo stdc++ GL GLU glut GLEW assimp)
 elseif(WIN32)
     set(HOME_LIB       "E:/Windows Kits/10/Lib/10.0.17763.0/um/x86")
     set(HOME_GLM       "F:/glm.0.9.9.800/build/native")
@@ -48,6 +48,6 @@ elseif(WIN32)
     set(HOME_FREE_GLUT "F:/freeglut.2.8.1.15/build/native") #"${HOME_ASSIMP}/build/native/include" build/native/lib/Win32
     include_directories("${HOME_GLM}/include" "${HOME_GLEW}/include" "${HOME_FREE_GLUT}/include" "${HOME_ASSIMP}/include" "${HOME_IMGUI}" "${HOME_IMGUI}/backends")
     link_directories("${HOME_GLEW}/lib/Release/Win32" "${HOME_FREE_GLUT}/lib/v110/Win32/Release/dynamic" "${HOME_ASSIMP}/lib/Debug")
-    add_executable(kineticDemo WIN32 ${SOURCE_FILES})
-    target_link_libraries(kineticDemo freeglut glew32 opengl32 assimp-vc141-mtd)
+    add_executable(jointBindDemo WIN32 ${SOURCE_FILES})
+    target_link_libraries(jointBindDemo freeglut glew32 opengl32 assimp-vc141-mtd)
 endif()

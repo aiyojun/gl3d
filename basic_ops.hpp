@@ -7,11 +7,21 @@
 
 namespace jlib {
     long GetSystemCurrentMs();
+    std::string vector_join(const std::string& demi, const std::vector<std::string>& v);
 }
 
 #if defined(ALL_IMPL)
 
 inline long jlib::GetSystemCurrentMs()
-{ return std::chrono::system_clock::now().time_since_epoch().count() / 100000; }
+{ return (long) (std::chrono::system_clock::now().time_since_epoch().count() / 100000); }
+
+std::string jlib::vector_join(const std::string& demi, const std::vector<std::string>& v)
+{
+    std::string _r;
+    for (std::vector<std::string>::size_type i = 0; i < v.size(); i++) {
+        if (i == v.size() - 1) _r += v[i]; else _r += v[i] + demi;
+    }
+    return std::move(_r);
+}
 
 #endif

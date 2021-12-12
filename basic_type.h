@@ -9,12 +9,13 @@
 struct Vertex {
     glm::vec3 position;
     glm::vec3 normal;
-    glm::vec2 texCoords;
+    // glm::vec2 texCoords;
 //    glm::vec3 tangent;
 //    glm::vec3 bitangent;
     typedef glm::vec3 v3;
     Vertex():
-    position(v3(0.0f)), normal(v3(0.0f)), texCoords(v3(0.0f)) {}
+    position(v3(0.0f)), normal(v3(0.0f)) {}
+	//position(v3(0.0f)), normal(v3(0.0f)), texCoords(v3(0.0f)) {}
 //    tangent(v3(0.0f)), bitangent(v3(0.0f)) {}
 //    Vertex(v3 p, v3 n, v3 tc, v3 t, v3 bt)
 //    : position(p), normal(n), texCoords(tc), tangent(t), bitangent(bt) {}

@@ -24,8 +24,8 @@ public:
     Material default_m;
     unsigned int shader_uid;
 //    bool no_fragment_variable = false;
-    int attribute_n = 3;
-    std::vector<int> attributes_m = {3, 3, 2};
+    int attribute_n = 2;//3;
+    std::vector<int> attributes_m = {3, 3};//, 2};
     std::vector<Mesh> meshes;
     std::vector<std::tuple<index_t, index_t, index_t>> ids;
 //    std::vector<unsigned int> shader_ids;
@@ -35,6 +35,7 @@ public:
     void load3d(const std::string& path, unsigned int shader, bool mat = true);
     void prepare();
     void render();
+    three3d_t copy();
 private:
     Mesh decompose_mesh(
             const aiScene* scene,
@@ -53,6 +54,20 @@ private:
 
 #if defined(D3_IMPL) || defined(ALL_IMPL)
 
+three3d_t three3d_t::copy()
+{
+    three3d_t _r;
+    _r.meshes = meshes;
+    _r.ids = ids;
+    _r.normal_factor = normal_factor;
+    _r.decompose_material = decompose_material;
+    _r.default_m = default_m;
+    _r.shader_uid = shader_uid;
+    _r.attribute_n = attribute_n;
+    _r.attributes_m = _r.attributes_m;
+    return _r;
+}
+
 //inline void three3d_t::set_not_normal()
 //{normal_factor = -1;}
 
@@ -66,7 +81,8 @@ Mesh three3d_t::decompose_mesh(
         Vertex vertex;
         vertex.position  = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
         vertex.normal    = glm::vec3(mesh->mNormals[i].x * (float) normal_factor, mesh->mNormals[i].y * (float) normal_factor, mesh->mNormals[i].z * (float) normal_factor);
-        vertex.texCoords = mesh->mTextureCoords[0] ? glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y) : glm::vec2(0.0f);
+		//if (attributes_m.size() >= 3)
+	    //    vertex.texCoords = mesh->mTextureCoords[0] ? glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y) : glm::vec2(0.0f);
         // vertex.tangent   = glm::vec3(mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z);
         // vertex.bitangent = glm::vec3(mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z);
         if (vertex.position.x > edge_max.x) edge_max.x = vertex.position.x;
@@ -247,7 +263,7 @@ void three3d_t::prepare()
         int offset = 0;
         for (int j = 0; j < attribute_n; j++) {
             glEnableVertexAttribArray(j);
-            glVertexAttribPointer(j, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*) (offset * sizeof(float)));
+            glVertexAttribPointer(j, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*) (offset * sizeof(float)));
             offset += attributes_m[j];
         }
         // glEnableVertexAttribArray(0);
@@ -366,7 +382,7 @@ void three3d_t::render()
 //            }
 //        }
         glUseProgram(shader_uid);
-        glUniform1i(glGetUniformLocation(shader_uid, "rendering"), rendering);
+        // glUniform1i(glGetUniformLocation(shader_uid, "rendering"), rendering);
         glBindVertexArray(std::get<0>(ids[i]));
         glDrawElements(GL_TRIANGLES, meshes[i].indices.size(), GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);

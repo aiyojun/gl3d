@@ -76,7 +76,7 @@ void smartfs::cache(const std::string& root)
 {
     finding_cache.clear();
     list_dir(finding_cache, root, LIST_TYPE::RECURSE);
-    std::cout << "Finding Cache:\n" << vector_join("\n  ", finding_cache) << std::endl;
+    // std::cout << "Finding Cache:\n" << vector_join("\n  ", finding_cache) << std::endl;
 }
 
 std::string smartfs::find(const std::string& filename)
