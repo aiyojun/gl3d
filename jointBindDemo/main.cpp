@@ -10,6 +10,7 @@
 #define ALL_IMPL
 #include "../D3.hpp"
 #include "../basic_type.h"
+#include "../glm_helper.h"
 #include "../smartfs.hpp"
 #include "../shader.h"
 #include "../basic_ops.hpp"
@@ -201,31 +202,12 @@ eular_right_leg,
 eular_right_small_leg
     };
     std::vector<glm::mat4> mx = topo.getMatrices(in);
-    // std::cout << "m0 size : " << cube_init_m.size() << "; mx size : " << mx.size() << std::endl;
     for (unsigned int index = 0; index < 10; index++) {
         glm::mat4& m0 = cube_init_m[index];
         glm::mat4 transform = mx[index] * m0;
-        // glm::mat4 transform = m0;
-        // if (index == 0) {
-        //     std::cout.setf(std::ios::fixed);
-        //     std::cout << "M [ " 
-        //     << std::setprecision(4) << transform[0][0] << ", "
-        //     << std::setprecision(4) << transform[1][0] << ", "
-        //     << std::setprecision(4) << transform[2][0] << ", "
-        //     << std::setprecision(4) << transform[3][0] << ", \n    "
-        //     << std::setprecision(4) << transform[0][1] << ", "
-        //     << std::setprecision(4) << transform[1][1] << ", "
-        //     << std::setprecision(4) << transform[2][1] << ", "
-        //     << std::setprecision(4) << transform[3][1] << ", \n    "
-        //     << std::setprecision(4) << transform[0][2] << ", "
-        //     << std::setprecision(4) << transform[1][2] << ", "
-        //     << std::setprecision(4) << transform[2][2] << ", "
-        //     << std::setprecision(4) << transform[3][2] << ", \n    "
-        //     << std::setprecision(4) << transform[0][3] << ", "
-        //     << std::setprecision(4) << transform[1][3] << ", "
-        //     << std::setprecision(4) << transform[2][3] << ", "
-        //     << std::setprecision(4) << transform[3][3] << "]\n"
-        //     ;
+        // if (index == 9) {
+        //     std::cout << "Final M : \n";
+        //     glm::println(mx[index]);
         // }
         shader_j.use();
         shader_j.set_mat4("transform", transform);
@@ -246,34 +228,33 @@ eular_right_small_leg
     ImGui::SliderFloat("head alpha", &eular_head.x, -360.f, 360.f);
     ImGui::SliderFloat("head beta", &eular_head.y, -360.f, 360.f);
     ImGui::SliderFloat("head gama", &eular_head.z, -360.f, 360.f);
-
-ImGui::SliderFloat("body alpha", &eular_body.x, -360.f, 360.f);
-ImGui::SliderFloat("body beta", &eular_body.y, -360.f, 360.f);
-ImGui::SliderFloat("body gama", &eular_body.z, -360.f, 360.f);
-ImGui::SliderFloat("left_arm alpha", &eular_left_arm.x, -360.f, 360.f);
-ImGui::SliderFloat("left_arm beta", &eular_left_arm.y, -360.f, 360.f);
-ImGui::SliderFloat("left_arm gama", &eular_left_arm.z, -360.f, 360.f);
-ImGui::SliderFloat("left_fore_arm alpha", &eular_left_fore_arm.x, -360.f, 360.f);
-ImGui::SliderFloat("left_fore_arm beta", &eular_left_fore_arm.y, -360.f, 360.f);
-ImGui::SliderFloat("left_fore_arm gama", &eular_left_fore_arm.z, -360.f, 360.f);
-ImGui::SliderFloat("right_arm alpha", &eular_right_arm.x, -360.f, 360.f);
-ImGui::SliderFloat("right_arm beta", &eular_right_arm.y, -360.f, 360.f);
-ImGui::SliderFloat("right_arm gama", &eular_right_arm.z, -360.f, 360.f);
-ImGui::SliderFloat("right_fore_arm alpha", &eular_right_fore_arm.x, -360.f, 360.f);
-ImGui::SliderFloat("right_fore_arm beta", &eular_right_fore_arm.y, -360.f, 360.f);
-ImGui::SliderFloat("right_fore_arm gama", &eular_right_fore_arm.z, -360.f, 360.f);
-ImGui::SliderFloat("left_leg alpha", &eular_left_leg.x, -360.f, 360.f);
-ImGui::SliderFloat("left_leg beta", &eular_left_leg.y, -360.f, 360.f);
-ImGui::SliderFloat("left_leg gama", &eular_left_leg.z, -360.f, 360.f);
-ImGui::SliderFloat("left_small_leg alpha", &eular_left_small_leg.x, -360.f, 360.f);
-ImGui::SliderFloat("left_small_leg beta", &eular_left_small_leg.y, -360.f, 360.f);
-ImGui::SliderFloat("left_small_leg gama", &eular_left_small_leg.z, -360.f, 360.f);
-ImGui::SliderFloat("right_leg alpha", &eular_right_leg.x, -360.f, 360.f);
-ImGui::SliderFloat("right_leg beta", &eular_right_leg.y, -360.f, 360.f);
-ImGui::SliderFloat("right_leg gama", &eular_right_leg.z, -360.f, 360.f);
-ImGui::SliderFloat("right_small_leg alpha", &eular_right_small_leg.x, -360.f, 360.f);
-ImGui::SliderFloat("right_small_leg beta", &eular_right_small_leg.y, -360.f, 360.f);
-ImGui::SliderFloat("right_small_leg gama", &eular_right_small_leg.z, -360.f, 360.f);
+    ImGui::SliderFloat("body alpha", &eular_body.x, -360.f, 360.f);
+    ImGui::SliderFloat("body beta", &eular_body.y, -360.f, 360.f);
+    ImGui::SliderFloat("body gama", &eular_body.z, -360.f, 360.f);
+    ImGui::SliderFloat("left_arm alpha", &eular_left_arm.x, -360.f, 360.f);
+    ImGui::SliderFloat("left_arm beta", &eular_left_arm.y, -360.f, 360.f);
+    ImGui::SliderFloat("left_arm gama", &eular_left_arm.z, -360.f, 360.f);
+    ImGui::SliderFloat("left_fore_arm alpha", &eular_left_fore_arm.x, -360.f, 360.f);
+    ImGui::SliderFloat("left_fore_arm beta", &eular_left_fore_arm.y, -360.f, 360.f);
+    ImGui::SliderFloat("left_fore_arm gama", &eular_left_fore_arm.z, -360.f, 360.f);
+    ImGui::SliderFloat("right_arm alpha", &eular_right_arm.x, -360.f, 360.f);
+    ImGui::SliderFloat("right_arm beta", &eular_right_arm.y, -360.f, 360.f);
+    ImGui::SliderFloat("right_arm gama", &eular_right_arm.z, -360.f, 360.f);
+    ImGui::SliderFloat("right_fore_arm alpha", &eular_right_fore_arm.x, -360.f, 360.f);
+    ImGui::SliderFloat("right_fore_arm beta", &eular_right_fore_arm.y, -360.f, 360.f);
+    ImGui::SliderFloat("right_fore_arm gama", &eular_right_fore_arm.z, -360.f, 360.f);
+    ImGui::SliderFloat("left_leg alpha", &eular_left_leg.x, -360.f, 360.f);
+    ImGui::SliderFloat("left_leg beta", &eular_left_leg.y, -360.f, 360.f);
+    ImGui::SliderFloat("left_leg gama", &eular_left_leg.z, -360.f, 360.f);
+    ImGui::SliderFloat("left_small_leg alpha", &eular_left_small_leg.x, -360.f, 360.f);
+    ImGui::SliderFloat("left_small_leg beta", &eular_left_small_leg.y, -360.f, 360.f);
+    ImGui::SliderFloat("left_small_leg gama", &eular_left_small_leg.z, -360.f, 360.f);
+    ImGui::SliderFloat("right_leg alpha", &eular_right_leg.x, -360.f, 360.f);
+    ImGui::SliderFloat("right_leg beta", &eular_right_leg.y, -360.f, 360.f);
+    ImGui::SliderFloat("right_leg gama", &eular_right_leg.z, -360.f, 360.f);
+    ImGui::SliderFloat("right_small_leg alpha", &eular_right_small_leg.x, -360.f, 360.f);
+    ImGui::SliderFloat("right_small_leg beta", &eular_right_small_leg.y, -360.f, 360.f);
+    ImGui::SliderFloat("right_small_leg gama", &eular_right_small_leg.z, -360.f, 360.f);
 
     ImGui::End();
     ImGui::Render();
