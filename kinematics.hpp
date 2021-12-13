@@ -47,9 +47,10 @@ public:
     float length;
     glm::vec3 pivot; // rotation point
     glm::vec3 angle; // eular
-    explicit Joint_t(const std::string& u, glm::vec3 p, float l, glm::vec3 a);
+    glm::vec3 keptPivot;
+    explicit Joint_t(const std::string& u, const glm::vec3& p, float l, const glm::vec3& a);
     std::string getUID();
-    void setPivot(const glm::vec3& p);
+    // void setPivot(const glm::vec3& p);
     void updatePivot(const glm::mat4& t);
     void setEular(const glm::vec3& e);
     void setParentPtr(Joint_t *p);
@@ -63,12 +64,13 @@ private:
     std::vector<Joint_t*> childrenPtr;
 };
 #if defined(ALL_IMPL)
-Joint_t::Joint_t(const std::string& u, glm::vec3 p, float l, glm::vec3 a)
-: uid(u), length(l), pivot(std::move(p)), angle(std::move(a)), parentPtr(nullptr), childrenPtr() {}
+#include "glm_helper.h"
+Joint_t::Joint_t(const std::string& u, const glm::vec3& p, float l, const glm::vec3& a)
+: uid(u), length(l), pivot(p), keptPivot(p), angle(a), parentPtr(nullptr), childrenPtr() {}
 inline std::string Joint_t::getUID() {return uid;}
-inline void Joint_t::setPivot(const glm::vec3& p) {pivot = p;}
+// inline void Joint_t::setPivot(const glm::vec3& p) {pivot = p;}
 inline void Joint_t::updatePivot(const glm::mat4& t) 
-{pivot = glm::vec3(t * glm::vec4(pivot, 1.f));}
+{pivot = glm::vec3(t * glm::vec4(keptPivot, 1.f));}
 inline void Joint_t::setEular(const glm::vec3& e) {angle = e;}
 inline void Joint_t::setParentPtr(Joint_t *p) {parentPtr = p;}
 inline Joint_t* Joint_t::getParentPtr() {return parentPtr;}
@@ -81,7 +83,7 @@ glm::mat4 Joint_t::getMatrix()
     transform = glm::rotate(transform, glm::radians(angle.x), glm::vec3(1.f, 0.f, 0.f));
     transform = glm::rotate(transform, glm::radians(angle.y), glm::vec3(0.f, 1.f, 0.f));
     transform = glm::rotate(transform, glm::radians(angle.z), glm::vec3(0.f, 0.f, 1.f));
-    transform = transform * glm::translate(glm::mat4(1.f), pivot * -1.f);
+    transform = glm::translate(transform, glm::vec3(-pivot.x, -pivot.y, -pivot.z));
     return transform;
 }
 #endif

@@ -26,9 +26,14 @@ The short-term targets:
 | Header | Intro |
 | ---- | ---- |
 | shader.hpp | GLSL compilation |
+| shader.h | New one |
 | D3.hpp | 3D Model importing via assimp |
 | smartfs.hpp | Simplify file searching |
-| sbt_image.h | load images, refer from LearnOpenGL |
+| basic_ops.hpp | C++ utilities |
+| coords.hpp | coordinate drawing |
+| glm_helper.h | Help to print matrix/vector of glm |
+| kinematics.hpp | Custom kinematics engine |
+| skybox.hpp | skybox rendering |
 
 ## Use cases
 
@@ -40,6 +45,10 @@ Summary of several small demos:
 | moDemo | simple demo for using assimp to import 3D model via a hand-writing obj file. |
 | imDemo | simple model control, interactive-form, and draw coordinate. |
 | skyDemo | simple model for creating cube texture, sky box, etc. |
+| sphereDemo | simple model for making vertices of a sphere freely! |
+| hdrDemo | panorama picture unfolding |
+| kineticDemo | simple kinematics simulation, two linkages mechanism. |
+| jointBindDemo | human skeletons binding, based on multi linkages structure. |
 
 ## Build
 
