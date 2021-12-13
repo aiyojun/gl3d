@@ -91,15 +91,17 @@ struct vertex_t {
 struct mesh_t {
     std::vector<vertex_t> vertices;
     std::vector<unsigned int> indices;
-//    std::vector<unsigned int> indices_lines;
-//    std::vector<unsigned int> indices_points;
-//    std::vector<unsigned int> indices_triangles;
-    std::vector<unsigned int> indices_point();
-    std::vector<unsigned int> indices_lines();
+    std::vector<unsigned int> indices_lines;
+    std::vector<unsigned int> indices_points;
+    static std::vector<unsigned int> indices_point(const std::vector<unsigned int>& indices);
+    static std::vector<unsigned int> indices_lines(const std::vector<unsigned int>& indices);
 };
+
+#define ALL_IMPL
 
 #if defined(ALL_IMPL)
 #include <map>
+#include <set>
 #include <tuple>
 
 static void cache_append(
@@ -114,7 +116,7 @@ static void cache_append(
         cache[uid] = std::move(std::tuple<unsigned int, unsigned int>(a, b));
 }
 
-std::vector<unsigned int> mesh_t::indices_point()
+std::vector<unsigned int> mesh_t::indices_point(const std::vector<unsigned int>& indices)
 {
     std::map<std::string, std::tuple<unsigned int, unsigned int>> cache;
     unsigned int index = 0;
@@ -124,10 +126,27 @@ std::vector<unsigned int> mesh_t::indices_point()
         cache_append(cache, indices[index + 1], indices[index + 2]);
         index = index + 3;
     }
-    return {};
+	std::vector<unsigned int> lines;
+	for (auto& kv : cache) {
+		lines.emplace_back(std::get<0>(kv.second));
+		lines.emplace_back(std::get<1>(kv.second));
+	}
+    return lines;
 }
-std::vector<unsigned int> mesh_t::indices_lines()
+std::vector<unsigned int> mesh_t::indices_lines(const std::vector<unsigned int>& indices)
 {
-    return {};
+    std::set<unsigned int> cache;
+    unsigned int index = 0;
+    while (index + 3 < indices.size()) {
+        cache.add(cache, indices[index]);
+        cache.add(cache, indices[index + 1]);
+        cache.add(cache, indices[index + 2]);
+        index = index + 3;
+    }
+	std::vector<unsigned int> points;
+	for (auto& p : cache) {
+		points.emplace_back(p);
+	}
+    return points;
 }
 #endif
