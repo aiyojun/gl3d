@@ -111,7 +111,7 @@ public:
     /** OpenGL */
     std::vector<glm::mat4> getMatrices(const std::vector<glm::vec3>& eulars);
 private:
-    Joint_t* root;
+    Joint_t* root = nullptr;
     std::vector<std::string> uids;
     std::map<std::string, Joint_t*> cache;
     void print(Joint_t* ptr); /** Keep this for debugging. */

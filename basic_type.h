@@ -82,3 +82,52 @@ struct ray_t {
     float ia, id, is;
     glm::vec3 dir, pos, color;
 };
+
+struct vertex_t {
+    glm::vec3 pos, norm, color;
+    glm::vec2 tex;
+};
+
+struct mesh_t {
+    std::vector<vertex_t> vertices;
+    std::vector<unsigned int> indices;
+//    std::vector<unsigned int> indices_lines;
+//    std::vector<unsigned int> indices_points;
+//    std::vector<unsigned int> indices_triangles;
+    std::vector<unsigned int> indices_point();
+    std::vector<unsigned int> indices_lines();
+};
+
+#if defined(ALL_IMPL)
+#include <map>
+#include <tuple>
+
+static void cache_append(
+        std::map<std::string, std::tuple<unsigned int, unsigned int>>& cache,
+        unsigned int a, unsigned int b)
+{
+    std::string uid = (a <= b)
+            ? (std::to_string(a) + "-" + std::to_string(b))
+            : (std::to_string(b) + "-" + std::to_string(a))
+            ;
+    if (cache.find(uid) == cache.end())
+        cache[uid] = std::move(std::tuple<unsigned int, unsigned int>(a, b));
+}
+
+std::vector<unsigned int> mesh_t::indices_point()
+{
+    std::map<std::string, std::tuple<unsigned int, unsigned int>> cache;
+    unsigned int index = 0;
+    while (index + 3 < indices.size()) {
+        cache_append(cache, indices[index    ], indices[index + 1]);
+        cache_append(cache, indices[index    ], indices[index + 2]);
+        cache_append(cache, indices[index + 1], indices[index + 2]);
+        index = index + 3;
+    }
+    return {};
+}
+std::vector<unsigned int> mesh_t::indices_lines()
+{
+    return {};
+}
+#endif

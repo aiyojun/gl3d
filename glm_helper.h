@@ -2,14 +2,33 @@
 
 namespace glm {
 
-void println(const glm::vec3& v);
-void println(const glm::mat4& m);
+    glm::vec3 transform_vertex(const glm::mat4& m, const glm::vec3& n);
+    glm::vec3 transform_normal(const glm::mat4& m, const glm::vec3& n);
+    float distance_pl(glm::vec3 o, glm::vec3 p, glm::vec3 q);
+
+    void println(const glm::vec3& v);
+    void println(const glm::mat4& m);
 
 }
 
 #if defined(ALL_IMPL)
 
 #include <iostream>
+
+inline float glm::distance_pl(glm::vec3 o, glm::vec3 p, glm::vec3 q)
+{
+    return glm::dot(glm::normalize(p - o), glm::normalize(q - o)) * glm::distance(o, p);
+}
+
+inline glm::vec3 glm::transform_vertex(const glm::mat4& m, const glm::vec3& n)
+{
+    return {m * glm::vec4(n, 1.0)};
+}
+
+inline glm::vec3 glm::transform_normal(const glm::mat4& m, const glm::vec3& n)
+{
+    return glm::normalize(glm::vec3(m * glm::vec4(n, 1.0)) - glm::vec3(m * glm::vec4(glm::vec3(0.f), 1.f)));
+}
 
 void glm::println(const glm::vec3& v)
 {
