@@ -6,6 +6,8 @@
 
 #include <glm/glm.hpp>
 
+
+
 struct Vertex {
     glm::vec3 position;
     glm::vec3 normal;
@@ -39,7 +41,7 @@ struct Material {
     Texture Td;
     Texture Ts;
     float shininess = 0.f;
-    Material(): Ka(0.0f), Kd(0.0f), Ks(0.0f), Ta(), Td(), Ts(), shininess(0) {}
+    Material(): Ka(0.0f), Kd(0.0f), Ks(0.0f), Ta(), Td(), Ts(), shininess(0) {Ka.x}
 };
 
 
@@ -94,7 +96,11 @@ struct mesh_t {
     std::vector<unsigned int> indices_lines;
     std::vector<unsigned int> indices_points;
     static std::vector<unsigned int> indices_point(const std::vector<unsigned int>& indices);
-    static std::vector<unsigned int> indices_lines(const std::vector<unsigned int>& indices);
+    static std::vector<unsigned int> indices_line(const std::vector<unsigned int>& indices);
+};
+
+struct handle_t {
+    unsigned int vao, vbo, ebo;
 };
 
 #define ALL_IMPL
@@ -133,14 +139,14 @@ std::vector<unsigned int> mesh_t::indices_point(const std::vector<unsigned int>&
 	}
     return lines;
 }
-std::vector<unsigned int> mesh_t::indices_lines(const std::vector<unsigned int>& indices)
+std::vector<unsigned int> mesh_t::indices_line(const std::vector<unsigned int>& indices)
 {
     std::set<unsigned int> cache;
     unsigned int index = 0;
     while (index + 3 < indices.size()) {
-        cache.add(cache, indices[index]);
-        cache.add(cache, indices[index + 1]);
-        cache.add(cache, indices[index + 2]);
+        cache.insert(indices[index]);
+        cache.insert(indices[index + 1]);
+        cache.insert(indices[index + 2]);
         index = index + 3;
     }
 	std::vector<unsigned int> points;

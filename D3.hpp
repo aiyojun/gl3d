@@ -18,6 +18,7 @@
 
 typedef unsigned int index_t;
 
+
 class three3d_t {
 public:
     glm::vec3 edge_min = glm::vec3(0.f), edge_max = glm::vec3(0.f);
@@ -28,6 +29,7 @@ public:
     std::vector<int> attributes_m = {3, 3};//, 2};
     std::vector<Mesh> meshes;
     std::vector<std::tuple<index_t, index_t, index_t>> ids;
+    std::vector<std::vector<handle_t>> handles;
 //    std::vector<unsigned int> shader_ids;
 //    void set_shader(unsigned int shader);
 //    void set_shader(unsigned int shader0, unsigned int shader1);
@@ -54,6 +56,10 @@ private:
 
 #if defined(D3_IMPL) || defined(ALL_IMPL)
 
+#include <map>
+#include <set>
+#include <tuple>
+
 three3d_t three3d_t::copy()
 {
     three3d_t _r;
@@ -67,6 +73,8 @@ three3d_t three3d_t::copy()
     _r.attributes_m = _r.attributes_m;
     return _r;
 }
+
+
 
 //inline void three3d_t::set_not_normal()
 //{normal_factor = -1;}
@@ -241,9 +249,11 @@ void three3d_t::load3d(const std::string& path, unsigned int shader, bool mat)
         std::cout << "3D import error: " << importer.GetErrorString() << std::endl;
         exit(2);
     }
-    meshes.clear(); ids.clear();
+    meshes.clear(); ids.clear(); handles.clear();
     iterate_mesh(scene, scene->mRootNode, meshes, decompose_material, 0, normal_factor);
 }
+
+
 
 void three3d_t::prepare()
 {
@@ -277,7 +287,13 @@ void three3d_t::prepare()
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-        ids.emplace_back(std::tuple<index_t, index_t, index_t>(vao, vbo, ebo));
+        std::vector<handle_t> 
+        triangles  {},
+        lines      {},
+        points     {}
+        ;
+        handles.emplace_back();
+        // ids.emplace_back(std::tuple<index_t, index_t, index_t>(vao, vbo, ebo));
         if (!decompose_material) {
 //            if (!no_fragment_variable) {
             glUseProgram(shader_uid);
@@ -384,6 +400,7 @@ void three3d_t::render()
         glUseProgram(shader_uid);
         // glUniform1i(glGetUniformLocation(shader_uid, "rendering"), rendering);
         glBindVertexArray(std::get<0>(ids[i]));
+        // glDrawElements(GL_TRIANGLES, meshes[i].indices.size(), GL_UNSIGNED_INT, 0);
         glDrawElements(GL_TRIANGLES, meshes[i].indices.size(), GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
     }

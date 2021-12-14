@@ -1,0 +1,17 @@
+cmake_minimum_required(VERSION 3.10.0)
+
+project(D3Demo)
+
+if(UNIX)
+    add_executable(D3Demo main.cpp ../D3.cpp)
+    target_link_libraries(D3Demo stdc++ m)
+elseif(WIN32)
+    set(HOME_LIB       "E:/Windows Kits/10/Lib/10.0.17763.0/um/x86")
+    set(HOME_GLM       "F:/glm.0.9.9.800/build/native")
+    set(HOME_GLEW      "F:/Program Files/glew-2.1.0-win32/glew-2.1.0")
+    set(HOME_FREE_GLUT "F:/freeglut.2.8.1.15/build/native")
+    include_directories("${HOME_GLM}/include" "${HOME_GLEW}/include" "${HOME_FREE_GLUT}/include")
+    link_directories("${HOME_GLEW}/lib/Release/Win32" "${HOME_FREE_GLUT}/lib/v110/Win32/Release/dynamic")
+    add_executable(D3Demo WIN32 main.cpp ../D3.cpp)
+    target_link_libraries(D3Demo )
+endif()
