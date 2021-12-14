@@ -1,28 +1,26 @@
 #include "D3.h"
-#include <map>
-#include <set>
-#include <tuple>
+#include "stb_image.h"
 
 namespace D3 {
 
-#define GEN_OBJECT                               \
-    index_t vao, vbo, ebo;                       \
-    glGenVertexArrays(1, &vao);                  \
-    glGenBuffers(1, &vbo);                       \
-    glGenBuffers(1, &ebo)
-#define BIND_VBO(c, p, n)                        \
-    glBindVertexArray(vao);                      \
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);          \
-    glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr) ((n) * sizeof(c)), (p), GL_STATIC_DRAW)
-#define BIND_EBO(p, n)                           \
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);  \
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, (n) * sizeof(unsigned int), (p), GL_STATIC_DRAW)
-#define UNBIND_OBJECT                            \
-    glBindVertexArray(0);                        \
-    glBindBuffer(GL_ARRAY_BUFFER, 0);            \
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
+#define GEN_OBJECT                                   \
+        index_t vao, vbo, ebo;                       \
+        glGenVertexArrays(1, &vao);                  \
+        glGenBuffers(1, &vbo);                       \
+        glGenBuffers(1, &ebo)
+#define BIND_VBO(c, p, n)                            \
+        glBindVertexArray(vao);                      \
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);          \
+        glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr) ((n) * sizeof(c)), (p), GL_STATIC_DRAW)
+#define BIND_EBO(p, n)                               \
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);  \
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, (n) * sizeof(unsigned int), (p), GL_STATIC_DRAW)
+#define UNBIND_OBJECT                                \
+        glBindVertexArray(0);                        \
+        glBindBuffer(GL_ARRAY_BUFFER, 0);            \
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
 
-    object3u vertex<is_1p>::allocate(const void *vertices, unsigned int n, const void *indices, unsigned int m)
+    object3u vertex1p::allocate(const void *vertices, unsigned int n, const void *indices, unsigned int m)
     {
         GEN_OBJECT;
         BIND_VBO(vertex1p, vertices, n);
@@ -30,70 +28,57 @@ namespace D3 {
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*) nullptr);
         UNBIND_OBJECT;
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*) 0);
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*) (3 * sizeof(float)));
-        glEnableVertexAttribArray(2);
-        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*) (6 * sizeof(float)));
         return {vao, vbo, ebo};
     }
-    object3u vertex<is_2c>::allocate(const void *vertices, unsigned int n, const void *indices, unsigned int m)
+    object3u vertex2c::allocate(const void *vertices, unsigned int n, const void *indices, unsigned int m)
     {
         GEN_OBJECT;
         BIND_VBO(vertex2c, vertices, n);
         BIND_EBO(indices, m);
-
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*) nullptr);
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*) (3 * sizeof(float)));
-
         UNBIND_OBJECT;
         return {vao, vbo, ebo};
     }
-    inline object3u vertex<is_2n>::allocate(const void *vertices, unsigned int n, const void *indices, unsigned int m)
+    inline object3u vertex2n::allocate(const void *vertices, unsigned int n, const void *indices, unsigned int m)
     {
         return vertex<is_2c>::allocate(vertices, n, indices, m);
     }
-    object3u vertex<is_3c>::allocate(const void *vertices, unsigned int n, const void *indices, unsigned int m)
+    object3u vertex3c::allocate(const void *vertices, unsigned int n, const void *indices, unsigned int m)
     {
         GEN_OBJECT;
         BIND_VBO(vertex3c, vertices, n);
         BIND_EBO(indices, m);
-
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*) nullptr);
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*) (3 * sizeof(float)));
         glEnableVertexAttribArray(2);
         glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*) (6 * sizeof(float)));
-
         UNBIND_OBJECT;
         return {vao, vbo, ebo};
     }
-    object3u vertex<is_3t>::allocate(const void *vertices, unsigned int n, const void *indices, unsigned int m)
+    object3u vertex3t::allocate(const void *vertices, unsigned int n, const void *indices, unsigned int m)
     {
         GEN_OBJECT;
         BIND_VBO(vertex3t, vertices, n);
         BIND_EBO(indices, m);
-
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*) nullptr);
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*) (3 * sizeof(float)));
         glEnableVertexAttribArray(2);
         glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*) (6 * sizeof(float)));
-
         UNBIND_OBJECT;
         return {vao, vbo, ebo};
     }
-    object3u vertex<is_5b>::allocate(const void *vertices, unsigned int n, const void *indices, unsigned int m)
+    object3u vertex5b::allocate(const void *vertices, unsigned int n, const void *indices, unsigned int m)
     {
         GEN_OBJECT;
         BIND_VBO(vertex5b, vertices, n);
         BIND_EBO(indices, m);
-
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*) nullptr);
         glEnableVertexAttribArray(1);
@@ -104,7 +89,6 @@ namespace D3 {
         glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*) (8 * sizeof(float)));
         glEnableVertexAttribArray(4);
         glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(float), (void*) (11 * sizeof(float)));
-
         UNBIND_OBJECT;
         return {vao, vbo, ebo};
     }
@@ -222,9 +206,9 @@ namespace D3 {
         return tmp_m;
     }
 
-    mesh<is_1p> AI::decompose1p(const aiScene *scene, const aiMesh *ai_mesh)
+    mesh1p AI::decompose1p(const aiScene *scene, const aiMesh *ai_mesh)
     {
-        mesh<is_1p> mesh;
+        mesh1p mesh;
         for (unsigned int i = 0; i < ai_mesh->mNumVertices; i++) {
             vertex1p v = {};
             v.pos = glm::vec3(ai_mesh->mVertices[i].x, ai_mesh->mVertices[i].y, ai_mesh->mVertices[i].z);
@@ -245,9 +229,9 @@ namespace D3 {
         return mesh;
     }
 
-    mesh<is_2c> AI::decompose2c(const aiScene* scene, const aiMesh* ai_mesh)
+    mesh2c AI::decompose2c(const aiScene* scene, const aiMesh* ai_mesh)
     {
-        mesh<is_2c> mesh;
+        mesh2c mesh;
         for (unsigned int i = 0; i < ai_mesh->mNumVertices; i++) {
             vertex2c v = {};
             v.pos   = glm::vec3(ai_mesh->mVertices[i].x, ai_mesh->mVertices[i].y, ai_mesh->mVertices[i].z);
@@ -269,9 +253,9 @@ namespace D3 {
         return mesh;
     }
 
-    mesh<is_2n> AI::decompose2n(const aiScene* scene, const aiMesh* ai_mesh)
+    mesh2n AI::decompose2n(const aiScene* scene, const aiMesh* ai_mesh)
     {
-        mesh<is_2n> mesh;
+        mesh2n mesh;
         for (unsigned int i = 0; i < ai_mesh->mNumVertices; i++) {
             vertex2n v = {};
             v.pos  = glm::vec3(ai_mesh->mVertices[i].x, ai_mesh->mVertices[i].y, ai_mesh->mVertices[i].z);
@@ -293,9 +277,9 @@ namespace D3 {
         return mesh;
     }
 
-    mesh<is_3c> AI::decompose3c(const aiScene* scene, const aiMesh* ai_mesh)
+    mesh3c AI::decompose3c(const aiScene* scene, const aiMesh* ai_mesh)
     {
-        mesh<is_3c> mesh;
+        mesh3c mesh;
         for (unsigned int i = 0; i < ai_mesh->mNumVertices; i++) {
             vertex3c v = {};
             v.pos   = glm::vec3(ai_mesh->mVertices[i].x, ai_mesh->mVertices[i].y, ai_mesh->mVertices[i].z);
@@ -318,9 +302,9 @@ namespace D3 {
         return mesh;
     }
 
-    mesh<is_3t> AI::decompose3t(const aiScene* scene, const aiMesh* ai_mesh)
+    mesh3t AI::decompose3t(const aiScene* scene, const aiMesh* ai_mesh)
     {
-        mesh<is_3t> mesh;
+        mesh3t mesh;
         for (unsigned int i = 0; i < ai_mesh->mNumVertices; i++) {
             vertex3t v = {};
             v.pos   = glm::vec3(ai_mesh->mVertices[i].x, ai_mesh->mVertices[i].y, ai_mesh->mVertices[i].z);
@@ -343,9 +327,9 @@ namespace D3 {
         return mesh;
     }
 
-    mesh<is_5b> AI::decompose5b(const aiScene* scene, const aiMesh* ai_mesh)
+    mesh5b AI::decompose5b(const aiScene* scene, const aiMesh* ai_mesh)
     {
-        mesh<is_5b> mesh;
+        mesh5b mesh;
         for (unsigned int i = 0; i < ai_mesh->mNumVertices; i++) {
             vertex5b v = {};
             v.pos   = glm::vec3(ai_mesh->mVertices[i].x, ai_mesh->mVertices[i].y, ai_mesh->mVertices[i].z);
@@ -370,203 +354,126 @@ namespace D3 {
         return mesh;
     }
 
-    void AI::iterate1p(const aiScene* scene, const aiNode* node, std::vector<mesh1p>& meshes, bool m)
+#define ITERATE(q)  \
+    void AI::iterate##q(const aiScene* scene, const aiNode* node, std::vector<mesh##q>& meshes, bool m)  \
+    {  \
+        for (unsigned int i = 0; i < node->mNumMeshes; i++) {  \
+            mesh##q mesh = std::move(decompose##q(scene, scene->mMeshes[node->mMeshes[i]]));  \
+            if (m) mesh.ma = decompose1m(scene, scene->mMeshes[node->mMeshes[i]]);  \
+            meshes.emplace_back(mesh);  \
+        }  \
+        for (unsigned int i = 0; i < node->mNumChildren; i++)  \
+            iterate##q(scene, node->mChildren[i], meshes, m);   \
+    }
+
+    ITERATE(1p)
+    ITERATE(2c)
+    ITERATE(2n)
+    ITERATE(3c)
+    ITERATE(3t)
+    ITERATE(5b)
+
+    unsigned int loadTexture(const std::string& path)
     {
-        for (unsigned int i = 0; i < node->mNumMeshes; i++) {
-            mesh1p mesh = std::move(decompose1p(scene, scene->mMeshes[node->mMeshes[i]]));
-            if (m) mesh.ma = decompose1m(scene, scene->mMeshes[node->mMeshes[i]]);
-            meshes.emplace_back(mesh);
+        unsigned int r = 0;
+        int width, height, nrChannels;
+        unsigned char *data = stbi_load(path.c_str(), &width, &height, &nrChannels, 0);
+        glGenTextures(1, &r);
+        GLenum format;
+        switch (nrChannels) {
+            case 1: format = GL_RED; break;
+            case 3: format = GL_RGB; break;
+            case 4: format = GL_RGBA;break;
+            default: std::cout << "unknown image deep" << std::endl; return 0;
         }
-        for (unsigned int i = 0; i < node->mNumChildren; i++)
-            iterate1p(scene, node->mChildren[i], meshes, m);
+        glBindTexture(GL_TEXTURE_2D, r);
+        glTexImage2D(GL_TEXTURE_2D, 0, (GLint) format, (int) width, (int) height, 0, format, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        stbi_image_free(data);
+        return r;
     }
 
-    void AI::iterate2c(const aiScene* scene, const aiNode* node, std::vector<mesh2c>& meshes, bool m)
+    static void _prepare_texture(const material& material, bool material_open)
     {
-        for (unsigned int i = 0; i < node->mNumMeshes; i++) {
-            mesh2c mesh = std::move(decompose2c(scene, scene->mMeshes[node->mMeshes[i]]));
-            if (m) mesh.ma = decompose1m(scene, scene->mMeshes[node->mMeshes[i]]);
-            meshes.emplace_back(mesh);
-        }
-        for (unsigned int i = 0; i < node->mNumChildren; i++)
-            iterate2c(scene, node->mChildren[i], meshes, m);
-    }
-
-    void AI::iterate2n(const aiScene* scene, const aiNode* node, std::vector<mesh2n>& meshes, bool m)
-    {
-        for (unsigned int i = 0; i < node->mNumMeshes; i++) {
-            mesh2n mesh = std::move(decompose2n(scene, scene->mMeshes[node->mMeshes[i]]));
-            if (m) mesh.ma = decompose1m(scene, scene->mMeshes[node->mMeshes[i]]);
-            meshes.emplace_back(mesh);
-        }
-        for (unsigned int i = 0; i < node->mNumChildren; i++)
-            iterate2n(scene, node->mChildren[i], meshes, m);
-    }
-
-    void AI::iterate3c(const aiScene* scene, const aiNode* node, std::vector<mesh3c>& meshes, bool m)
-    {
-        for (unsigned int i = 0; i < node->mNumMeshes; i++) {
-            mesh3c mesh = std::move(decompose3c(scene, scene->mMeshes[node->mMeshes[i]]));
-            if (m) mesh.ma = decompose1m(scene, scene->mMeshes[node->mMeshes[i]]);
-            meshes.emplace_back(mesh);
-        }
-        for (unsigned int i = 0; i < node->mNumChildren; i++)
-            iterate3c(scene, node->mChildren[i], meshes, m);
-    }
-
-    void AI::iterate3t(const aiScene* scene, const aiNode* node, std::vector<mesh3t>& meshes, bool m)
-    {
-        for (unsigned int i = 0; i < node->mNumMeshes; i++) {
-            mesh3t mesh = std::move(decompose3t(scene, scene->mMeshes[node->mMeshes[i]]));
-            if (m) mesh.ma = decompose1m(scene, scene->mMeshes[node->mMeshes[i]]);
-            meshes.emplace_back(mesh);
-        }
-        for (unsigned int i = 0; i < node->mNumChildren; i++)
-            iterate3t(scene, node->mChildren[i], meshes, m);
-    }
-
-    void AI::iterate5b(const aiScene* scene, const aiNode* node, std::vector<mesh5b>& meshes, bool m)
-    {
-        for (unsigned int i = 0; i < node->mNumMeshes; i++) {
-            mesh5b mesh = std::move(decompose5b(scene, scene->mMeshes[node->mMeshes[i]]));
-            if (m) mesh.ma = decompose1m(scene, scene->mMeshes[node->mMeshes[i]]);
-            meshes.emplace_back(mesh);
-        }
-        for (unsigned int i = 0; i < node->mNumChildren; i++)
-            iterate5b(scene, node->mChildren[i], meshes, m);
-    }
-
-    void three1p::prepare() {
-        for (auto& mesh : meshes) {
-            mesh.points  = std::move(parse2p(mesh.triangles));
-            mesh.lines   = std::move(parse2l(mesh.triangles));
-            object3u obj2t = vertex1p::allocate(&mesh.vertices[0], mesh.vertices.size(), &mesh.triangles[0], mesh.triangles.size());
-            object3u obj2p = vertex1p::allocate(&mesh.vertices[0], mesh.vertices.size(), &mesh.points[0], mesh.points.size());
-            object3u obj2l = vertex1p::allocate(&mesh.vertices[0], mesh.vertices.size(), &mesh.lines[0], mesh.lines.size());
-            objects.emplace_back(std::tuple(obj2t, obj2l, obj2p));
-        }
-    }
-    void three1p::render() {
-        for (int i = 0; i < meshes.size(); i++) {
-            glBindVertexArray(std::get<0>(objects[i]).vao);
-            glDrawElements(GL_TRIANGLES, meshes[i].triangles.size(), GL_UNSIGNED_INT, nullptr);
-            glBindVertexArray(0);
+        if (material_open) {
+            if (!material.Ta.id.empty()) {
+                material.Ta.id = loadTexture(material.Ta.path);
+            }
+            if (!material.Td.id.empty()) {
+                material.Td.id = loadTexture(material.Td.path);
+            }
+            if (!material.Ts.id.empty()) {
+                material.Ts.id = loadTexture(material.Ts.path);
+            }
         }
     }
 
-    void three2c::prepare() {
-        for (auto& mesh : meshes) {
-            mesh.points  = std::move(parse2p(mesh.triangles));
-            mesh.lines   = std::move(parse2l(mesh.triangles));
-            object3u obj2t = vertex1p::allocate(&mesh.vertices[0], mesh.vertices.size(), &mesh.triangles[0], mesh.triangles.size());
-            object3u obj2p = vertex1p::allocate(&mesh.vertices[0], mesh.vertices.size(), &mesh.points[0], mesh.points.size());
-            object3u obj2l = vertex1p::allocate(&mesh.vertices[0], mesh.vertices.size(), &mesh.lines[0], mesh.lines.size());
-            objects.emplace_back(std::tuple(obj2t, obj2l, obj2p));
-        }
-    }
-    void three2c::render() {
-        for (int i = 0; i < meshes.size(); i++) {
-            glBindVertexArray(std::get<0>(objects[i]).vao);
-            glDrawElements(GL_TRIANGLES, meshes[i].triangles.size(), GL_UNSIGNED_INT, nullptr);
-            glBindVertexArray(0);
-        }
+#define PREPARE(q)  \
+    void three##q::prepare() {  \
+        for (auto& mesh : meshes) {  \
+            mesh.points  = std::move(parse2p(mesh.triangles));  \
+            mesh.lines   = std::move(parse2l(mesh.triangles));  \
+            object3u obj2t = vertex1p::allocate(&mesh.vertices[0], mesh.vertices.size(), &mesh.triangles[0], mesh.triangles.size());  \
+            object3u obj2p = vertex1p::allocate(&mesh.vertices[0], mesh.vertices.size(), &mesh.points[0], mesh.points.size());  \
+            object3u obj2l = vertex1p::allocate(&mesh.vertices[0], mesh.vertices.size(), &mesh.lines[0], mesh.lines.size());  \
+            objects.emplace_back(std::tuple(obj2t, obj2l, obj2p));  \
+            _prepare_texture(mesh.material, material_open);  \
+        }  \
     }
 
-    void three2n::prepare() {
-        for (auto& mesh : meshes) {
-            mesh.points  = std::move(parse2p(mesh.triangles));
-            mesh.lines   = std::move(parse2l(mesh.triangles));
-            object3u obj2t = vertex1p::allocate(&mesh.vertices[0], mesh.vertices.size(), &mesh.triangles[0], mesh.triangles.size());
-            object3u obj2p = vertex1p::allocate(&mesh.vertices[0], mesh.vertices.size(), &mesh.points[0], mesh.points.size());
-            object3u obj2l = vertex1p::allocate(&mesh.vertices[0], mesh.vertices.size(), &mesh.lines[0], mesh.lines.size());
-            objects.emplace_back(std::tuple(obj2t, obj2l, obj2p));
-        }
-    }
-    void three2n::render() {
-        for (int i = 0; i < meshes.size(); i++) {
-            glBindVertexArray(std::get<0>(objects[i]).vao);
-            glDrawElements(GL_TRIANGLES, meshes[i].triangles.size(), GL_UNSIGNED_INT, nullptr);
-            glBindVertexArray(0);
-        }
+    PREPARE(1p)
+    PREPARE(2c)
+    PREPARE(2n)
+    PREPARE(3c)
+    PREPARE(3t)
+    PREPARE(5b)
+
+#define RENDER(q)  \
+    void three##q::render() {  \
+        for (int i = 0; i < meshes.size(); i++) {  \
+            glBindVertexArray(std::get<0>(objects[i]).vao);  \
+            glDrawElements(GL_TRIANGLES, meshes[i].triangles.size(), GL_UNSIGNED_INT, nullptr);  \
+            glBindVertexArray(0);  \
+        }  \
     }
 
-    void three3c::prepare() {
-        for (auto& mesh : meshes) {
-            mesh.points  = std::move(parse2p(mesh.triangles));
-            mesh.lines   = std::move(parse2l(mesh.triangles));
-            object3u obj2t = vertex1p::allocate(&mesh.vertices[0], mesh.vertices.size(), &mesh.triangles[0], mesh.triangles.size());
-            object3u obj2p = vertex1p::allocate(&mesh.vertices[0], mesh.vertices.size(), &mesh.points[0], mesh.points.size());
-            object3u obj2l = vertex1p::allocate(&mesh.vertices[0], mesh.vertices.size(), &mesh.lines[0], mesh.lines.size());
-            objects.emplace_back(std::tuple(obj2t, obj2l, obj2p));
-        }
-    }
-    void three3c::render() {
-        for (int i = 0; i < meshes.size(); i++) {
-            glBindVertexArray(std::get<0>(objects[i]).vao);
-            glDrawElements(GL_TRIANGLES, meshes[i].triangles.size(), GL_UNSIGNED_INT, nullptr);
-            glBindVertexArray(0);
-        }
+    RENDER(1p)
+    RENDER(2c)
+    RENDER(2n)
+    RENDER(3c)
+    RENDER(3t)
+    RENDER(5b)
+
+#define LOAD3D(q)              \
+        three##q load##q(const std::string& path, bool material_open) {  \
+        three##q three;             \
+        Assimp::Importer importer;  \
+        const aiScene* scene = importer.ReadFile(  \
+                path,                              \
+                aiProcess_CalcTangentSpace         \
+                | aiProcess_Triangulate            \
+                | aiProcess_JoinIdenticalVertices  \
+                | aiProcess_SortByPType            \
+                );                 \
+        if (!scene) {  \
+            std::cout << "3D import error: " << importer.GetErrorString() << std::endl;  \
+            exit(2);   \
+        }              \
+        three.meshes.clear();      \
+        three.objects.clear();     \
+        three.material_open = material_open;       \
+        AI::iterate##q(scene, scene->mRootNode, three.meshes, material_open);  \
+        return three;  \
     }
 
-    void three3t::prepare() {
-        for (auto& mesh : meshes) {
-            mesh.points  = std::move(parse2p(mesh.triangles));
-            mesh.lines   = std::move(parse2l(mesh.triangles));
-            object3u obj2t = vertex1p::allocate(&mesh.vertices[0], mesh.vertices.size(), &mesh.triangles[0], mesh.triangles.size());
-            object3u obj2p = vertex1p::allocate(&mesh.vertices[0], mesh.vertices.size(), &mesh.points[0], mesh.points.size());
-            object3u obj2l = vertex1p::allocate(&mesh.vertices[0], mesh.vertices.size(), &mesh.lines[0], mesh.lines.size());
-            objects.emplace_back(std::tuple(obj2t, obj2l, obj2p));
-        }
-    }
-    void three3t::render() {
-        for (int i = 0; i < meshes.size(); i++) {
-            glBindVertexArray(std::get<0>(objects[i]).vao);
-            glDrawElements(GL_TRIANGLES, meshes[i].triangles.size(), GL_UNSIGNED_INT, nullptr);
-            glBindVertexArray(0);
-        }
-    }
-
-    void three5b::prepare() {
-        for (auto& mesh : meshes) {
-            mesh.points  = std::move(parse2p(mesh.triangles));
-            mesh.lines   = std::move(parse2l(mesh.triangles));
-            object3u obj2t = vertex1p::allocate(&mesh.vertices[0], mesh.vertices.size(), &mesh.triangles[0], mesh.triangles.size());
-            object3u obj2p = vertex1p::allocate(&mesh.vertices[0], mesh.vertices.size(), &mesh.points[0], mesh.points.size());
-            object3u obj2l = vertex1p::allocate(&mesh.vertices[0], mesh.vertices.size(), &mesh.lines[0], mesh.lines.size());
-            objects.emplace_back(std::tuple(obj2t, obj2l, obj2p));
-        }
-    }
-    void three5b::render() {
-        for (int i = 0; i < meshes.size(); i++) {
-            glBindVertexArray(std::get<0>(objects[i]).vao);
-            glDrawElements(GL_TRIANGLES, meshes[i].triangles.size(), GL_UNSIGNED_INT, nullptr);
-            glBindVertexArray(0);
-        }
-    }
-
-#define LOAD_3D(q)          \
-    three##q three;             \
-    Assimp::Importer importer;  \
-    const aiScene* scene = importer.ReadFile(  \
-            path,                              \
-            aiProcess_CalcTangentSpace         \
-            | aiProcess_Triangulate            \
-            | aiProcess_JoinIdenticalVertices  \
-            | aiProcess_SortByPType            \
-            );                 \
-    if (!scene) {  \
-        std::cout << "3D import error: " << importer.GetErrorString() << std::endl;  \
-        exit(2);   \
-    }              \
-    three.meshes.clear();      \
-    three.objects.clear();     \
-    AI::iterate##q(scene, scene->mRootNode, three.meshes, material_open);  \
-    return three
-
-    three1p three3d::load1p(const std::string& path, bool material_open) {LOAD_3D(1p);}
-    three2c three3d::load2c(const std::string& path, bool material_open) {LOAD_3D(2c);}
-    three2n three3d::load2n(const std::string& path, bool material_open) {LOAD_3D(2n);}
-    three3c three3d::load3c(const std::string& path, bool material_open) {LOAD_3D(3c);}
-    three3t three3d::load3t(const std::string& path, bool material_open) {LOAD_3D(3t);}
-    three5b three3d::load5b(const std::string& path, bool material_open) {LOAD_3D(5b);}
+    LODA3D(1p)
+    LODA3D(2c)
+    LODA3D(2n)
+    LODA3D(3c)
+    LODA3D(3t)
+    LODA3D(5b)
 }
