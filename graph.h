@@ -103,14 +103,13 @@ namespace geo {
 
 bool PointInCylinder(const glm::vec3& q, const glm::vec3& o, const glm::vec3& p, float ro, float rp)
 {
-    int factor = ;
     glm::vec3 uv_op(glm::normalize(p - o));
     glm::vec3 uv_oq(glm::normalize(q - o));
     float u_cos = glm::dot(uv_op, uv_oq);
-    float l = glm::distance(o, q) * u_cos;
-    float h = glm::distance(o, q) * glm::distance(glm::vec3(0.f), glm::cross(uv_op, uv_oq));
-    float pq = glm::distance(glm::vec3(0.f), glm::vec3(q - p));
-    float oq = glm::distance(glm::vec3(0.f), uv_oq);
+    float l     = glm::distance(o, q) * u_cos;
+    float h     = glm::distance(o, q) * glm::distance(glm::vec3(0.f), glm::cross(uv_op, uv_oq));
+    float pq    = glm::distance(glm::vec3(0.f), glm::vec3(q - p));
+    float oq    = glm::distance(glm::vec3(0.f), uv_oq);
     if (u_cos >= 0) {
         return h <= (ro * pq + rp * oq) / glm::distance(glm::vec3(0.f), uv_op);
     } else {

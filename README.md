@@ -25,9 +25,9 @@ The short-term targets:
 
 | Header | Intro |
 | ---- | ---- |
-| shader.hpp | GLSL compilation |
-| shader.h | New one |
-| D3.hpp | 3D Model importing via assimp |
+| shader.h | GLSL compilation |
+| graph.h | Vertices coordinate generator of several common geometry |
+| D3.h | 3D Model importing via assimp |
 | smartfs.hpp | Simplify file searching |
 | basic_ops.hpp | C++ utilities |
 | coords.hpp | coordinate drawing |
