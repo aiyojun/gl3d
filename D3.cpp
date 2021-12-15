@@ -1,5 +1,6 @@
 #include "D3.h"
 #include "stb_image.h"
+#include <iostream>
 
 namespace D3 {
 
@@ -44,7 +45,7 @@ namespace D3 {
     }
     inline object3u vertex2n::allocate(const void *vertices, unsigned int n, const void *indices, unsigned int m)
     {
-        return vertex<is_2c>::allocate(vertices, n, indices, m);
+        return vertex2c::allocate(vertices, n, indices, m);
     }
     object3u vertex3c::allocate(const void *vertices, unsigned int n, const void *indices, unsigned int m)
     {
@@ -131,7 +132,7 @@ namespace D3 {
             cache.insert(indices[index + 2]);
             index = index + 3;
         }
-        std::vector<unsigned int> points;
+        std::vector<unsigned int> points(cache.size());
         for (auto& p : cache) {
             points.emplace_back(p);
         }
@@ -397,20 +398,51 @@ namespace D3 {
         return r;
     }
 
-    static void _prepare_texture(const material& material, bool material_open)
+    static void _prepare_texture(material& material, bool material_open)
     {
         if (material_open) {
-            if (!material.Ta.id.empty()) {
+            if (!material.Ta.path.empty()) {
                 material.Ta.id = loadTexture(material.Ta.path);
             }
-            if (!material.Td.id.empty()) {
+            if (!material.Td.path.empty()) {
                 material.Td.id = loadTexture(material.Td.path);
             }
-            if (!material.Ts.id.empty()) {
+            if (!material.Ts.path.empty()) {
                 material.Ts.id = loadTexture(material.Ts.path);
             }
         }
     }
+
+//    static void shader_set(unsigned int shader)
+//    {
+//
+//    }
+//
+//    void prepare(void (*shader)())
+//    {
+//        if () {
+//
+//        }
+//        shader();
+//    }
+//
+//    void render(void (*shader)())
+//    {
+//        shader();
+//    }
+
+#define SHADER_SET(q) \
+    void three##q::shader_set(const shader_func& pre, const shader_func& pos) { \
+        ws.pre_ptr = pre; ws.pos_ptr = pos;  \
+    }
+
+    SHADER_SET(1p)
+    SHADER_SET(2c)
+    SHADER_SET(2n)
+    SHADER_SET(3c)
+    SHADER_SET(3t)
+    SHADER_SET(5b)
+
 
 #define PREPARE(q)  \
     void three##q::prepare() {  \
@@ -421,7 +453,8 @@ namespace D3 {
             object3u obj2p = vertex1p::allocate(&mesh.vertices[0], mesh.vertices.size(), &mesh.points[0], mesh.points.size());  \
             object3u obj2l = vertex1p::allocate(&mesh.vertices[0], mesh.vertices.size(), &mesh.lines[0], mesh.lines.size());  \
             objects.emplace_back(std::tuple(obj2t, obj2l, obj2p));  \
-            _prepare_texture(mesh.material, material_open);  \
+            _prepare_texture(mesh.ma, material_open);  \
+            if (material_open && ws.pre_ptr != nullptr) ws.pre_ptr(&mesh.ma);  \
         }  \
     }
 
@@ -438,6 +471,7 @@ namespace D3 {
             glBindVertexArray(std::get<0>(objects[i]).vao);  \
             glDrawElements(GL_TRIANGLES, meshes[i].triangles.size(), GL_UNSIGNED_INT, nullptr);  \
             glBindVertexArray(0);  \
+            if (material_open && ws.pos_ptr != nullptr) ws.pos_ptr(&meshes[i].ma);  \
         }  \
     }
 
@@ -448,9 +482,10 @@ namespace D3 {
     RENDER(3t)
     RENDER(5b)
 
-#define LOAD3D(q)              \
-        three##q load##q(const std::string& path, bool material_open) {  \
+#define LOAD3D(q)  \
+    three##q load##q(const std::string& path, bool material_open) {  \
         three##q three;             \
+        three.ws = {nullptr, nullptr};  \
         Assimp::Importer importer;  \
         const aiScene* scene = importer.ReadFile(  \
                 path,                              \
@@ -470,10 +505,10 @@ namespace D3 {
         return three;  \
     }
 
-    LODA3D(1p)
-    LODA3D(2c)
-    LODA3D(2n)
-    LODA3D(3c)
-    LODA3D(3t)
-    LODA3D(5b)
+    LOAD3D(1p)
+    LOAD3D(2c)
+    LOAD3D(2n)
+    LOAD3D(3c)
+    LOAD3D(3t)
+    LOAD3D(5b)
 }

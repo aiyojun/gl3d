@@ -5,7 +5,6 @@
 #include <tuple>
 #include <string>
 #include <vector>
-#include <iostream>
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 #include <assimp/scene.h>
@@ -87,11 +86,20 @@ namespace D3 {
         static void iterate5b(const aiScene* scene, const aiNode* node, std::vector<mesh5b>& meshes, bool m);
     };
 
-    unsigned int loadTexture(const std::string& path)；
+    unsigned int loadTexture(const std::string& path);
+
+    typedef void (*shader_func)(material* m);
+
+    struct with_shader {
+        shader_func pre_ptr = nullptr;
+        shader_func pos_ptr = nullptr;
+    };
 
     struct three1p {
         void prepare();
         void render();
+        void shader_set(const shader_func& pre, const shader_func& pos);
+        with_shader ws;
         bool material_open;
         std::vector<mesh1p> meshes;
         std::vector<std::tuple<object3u, object3u, object3u>> objects;
@@ -100,6 +108,8 @@ namespace D3 {
     struct three2c {
         void prepare();
         void render();
+        void shader_set(const shader_func& pre, const shader_func& pos);
+        with_shader ws;
         bool material_open;
         std::vector<mesh2c> meshes;
         std::vector<std::tuple<object3u, object3u, object3u>> objects;
@@ -108,6 +118,8 @@ namespace D3 {
     struct three2n {
         void prepare();
         void render();
+        void shader_set(const shader_func& pre, const shader_func& pos);
+        with_shader ws;
         bool material_open;
         std::vector<mesh2n> meshes;
         std::vector<std::tuple<object3u, object3u, object3u>> objects;
@@ -116,6 +128,8 @@ namespace D3 {
     struct three3c {
         void prepare();
         void render();
+        void shader_set(const shader_func& pre, const shader_func& pos);
+        with_shader ws;
         bool material_open;
         std::vector<mesh3c> meshes;
         std::vector<std::tuple<object3u, object3u, object3u>> objects;
@@ -124,6 +138,8 @@ namespace D3 {
     struct three3t {
         void prepare();
         void render();
+        void shader_set(const shader_func& pre, const shader_func& pos);
+        with_shader ws;
         bool material_open;
         std::vector<mesh3t> meshes;
         std::vector<std::tuple<object3u, object3u, object3u>> objects;
@@ -132,6 +148,8 @@ namespace D3 {
     struct three5b {
         void prepare();
         void render();
+        void shader_set(const shader_func& pre, const shader_func& pos);
+        with_shader ws;
         bool material_open;
         std::vector<mesh5b> meshes;
         std::vector<std::tuple<object3u, object3u, object3u>> objects;
