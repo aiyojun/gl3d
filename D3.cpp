@@ -413,24 +413,6 @@ namespace D3 {
         }
     }
 
-//    static void shader_set(unsigned int shader)
-//    {
-//
-//    }
-//
-//    void prepare(void (*shader)())
-//    {
-//        if () {
-//
-//        }
-//        shader();
-//    }
-//
-//    void render(void (*shader)())
-//    {
-//        shader();
-//    }
-
 #define SHADER_SET(q) \
     void three##q::shader_set(const shader_func& pre, const shader_func& pos) { \
         ws.pre_ptr = pre; ws.pos_ptr = pos;  \

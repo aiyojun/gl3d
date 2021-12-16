@@ -7,7 +7,7 @@
 
 MAIN_BE
 {
-    three3t model = D3::load3t(smartfs::find("cube.obj"));
+    D3::three3t model = D3::load3t(smartfs::find("cube.obj"));
     model.prepare();
 }
 MAIN_EN
