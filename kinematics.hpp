@@ -8,7 +8,7 @@
 class TF {
 public:
     TF();
-    float iTime();
+    float iTime() const;
 private:
     long beginTime;
 };
@@ -17,15 +17,15 @@ class Joint_t {
 public:
     float length;
     glm::vec3 pivot, euler, keptPivot;
-    explicit Joint_t(const std::string& u, const glm::vec3& p, float l, const glm::vec3& a);
+    explicit Joint_t(std::string  u, const glm::vec3& p, float l, const glm::vec3& a);
     std::string getUID();
     void updatePivot(const glm::mat4& t);
-    void setEular(const glm::vec3& e);
+    void setEuler(const glm::vec3& e);
     void setParentPtr(Joint_t *p);
     Joint_t* getParentPtr();
     void addChildPtr(Joint_t* j);
     const std::vector<Joint_t*>& getChildrenPtr();
-    glm::mat4 getMatrix();
+    glm::mat4 getMatrix() const;
 private:
     const std::string uid;
     Joint_t* parentPtr;
@@ -40,7 +40,7 @@ public:
     std::vector<Joint_t*> getChain(const std::string& u);
     void clear();
     /** OpenGL */
-    std::vector<glm::mat4> getMatrices(const std::vector<glm::vec3>& eulars);
+    std::vector<glm::mat4> getMatrices(const std::vector<glm::vec3>& eulers);
 private:
     Joint_t* root = nullptr;
     std::vector<std::string> uids;
@@ -57,22 +57,22 @@ private:
 
 TF::TF(): beginTime(jlib::GetSystemCurrentMs()) {}
 
-float TF::iTime() 
+float TF::iTime() const
 { return (float) (((double) (jlib::GetSystemCurrentMs() - beginTime)) / 1000000); }
 
 //////////////////////////////////////////////////////////////////////
 
-Joint_t::Joint_t(const std::string& u, const glm::vec3& p, float l, const glm::vec3& a)
-: uid(u), length(l), pivot(p), keptPivot(p), euler(a), parentPtr(nullptr), childrenPtr() {}
+Joint_t::Joint_t(std::string u, const glm::vec3& p, float l, const glm::vec3& a)
+: uid(std::move(u)), length(l), pivot(p), keptPivot(p), euler(a), parentPtr(nullptr), childrenPtr() {}
 inline std::string Joint_t::getUID() {return uid;}
 inline void Joint_t::updatePivot(const glm::mat4& t) 
 {pivot = glm::vec3(t * glm::vec4(keptPivot, 1.f));}
-inline void Joint_t::setEular(const glm::vec3& e) {euler = e;}
+inline void Joint_t::setEuler(const glm::vec3& e) { euler = e;}
 inline void Joint_t::setParentPtr(Joint_t *p) {parentPtr = p;}
 inline Joint_t* Joint_t::getParentPtr() {return parentPtr;}
 inline void Joint_t::addChildPtr(Joint_t* j) {childrenPtr.emplace_back(j);}
 inline const std::vector<Joint_t*>& Joint_t::getChildrenPtr() {return childrenPtr;}
-glm::mat4 Joint_t::getMatrix()
+glm::mat4 Joint_t::getMatrix() const
 {
     glm::mat4 transform(1.f);
     transform = glm::translate(transform, pivot);
@@ -160,8 +160,8 @@ void Topology_t::clear()
 std::vector<glm::mat4> Topology_t::getMatrices(const std::vector<glm::vec3>& eulars)
 {
     std::vector<glm::mat4> _r;
-    for (unsigned int i = 0; i < eulars.size(); i++) 
-        cache[uids[i]]->setEular(eulars[i]);
+    for (unsigned int i = 0; i < eulars.size(); i++)
+        cache[uids[i]]->setEuler(eulars[i]);
     for (unsigned int index = 0; index < uids.size(); index++) {
         std::string uid = uids[index];
         std::vector<Joint_t*> chain = getChain(uid);

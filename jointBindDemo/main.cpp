@@ -121,7 +121,7 @@ void init()
     light.is = 0.3f;
     light.dir = glm::vec3(0.f, -1.f, 0.f);
     light.color = glm::vec3(1.f, 1.f, 1.f);
-    shader_j.init(smartfs::find("joint.glsl"));
+    shader_j.init(smartfs::find("sample_joint.glsl"));
     // std::cout << "-- 03" << std::endl;
 
    

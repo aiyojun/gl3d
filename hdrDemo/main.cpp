@@ -67,7 +67,7 @@ void init() {
     ImGui_ImplOpenGL2_Init();
 
     smartfs::cache(smartfs::prefix(smartfs::runtime_path(), "gl3d"));
-    shader_ray.init(smartfs::find("onelight.glsl"));
+    shader_ray.init(smartfs::find("sample_parallel_light.glsl"));
 
     light.ia = 0.3f;
     light.id = 0.3f;
@@ -89,11 +89,11 @@ void init() {
 //            smartfs::find("default_sky_box_side.jpg")
 //    };
 //    sky_tex = skybox_t::create_sky(skys);
-//    shader_sky.init(smartfs::find("skybox.glsl"));
+//    shader_sky.init(smartfs::find("sample_skybox.glsl"));
 //    shader_sky.use();
 //    shader_sky.set_int("skybox", 0);
 
-    shader_co.init(smartfs::find("coords.glsl"));
+    shader_co.init(smartfs::find("sample_coords.glsl"));
     coords.init();
 
 //    three3D.load3d(smartfs::find("Audi_R8_2017.obj"), shader_ray.shader_id, false);
@@ -106,7 +106,7 @@ void init() {
 //    gravity_point.y = (three3D.edge_min.y + three3D.edge_max.y) / 2;
 //    gravity_point.z = spindle.y;
 
-    shader_hdr.init(smartfs::find("hdr.glsl"));
+    shader_hdr.init(smartfs::find("sample_hdr.glsl"));
 //    sphere3D.load3d(smartfs::find("cube.obj"), shader_ray.shader_id, false);
     sphere3D.load3d(smartfs::find("sphere.obj"), shader_hdr.shader_id, true);
     sphere3D.prepare();
